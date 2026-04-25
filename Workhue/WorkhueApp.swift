@@ -9,9 +9,19 @@ import SwiftUI
 
 @main
 struct WorkhueApp: App {
+    @State private var router = NavigationRouter.shared
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationStack(path: $router.path) {
+                HomeView()
+                    .navigationDestination(for: Route.self) { route in
+                        switch route {
+                        default :
+                            HomeView()
+                        }
+                    }
+            }
         }
     }
 }
