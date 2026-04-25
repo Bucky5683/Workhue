@@ -10,24 +10,30 @@ import SwiftUI
 struct CalendarView: View {
     @State private var currentMonth: Date = Date()
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
+    let dateModels: [DayWorkModel]
+    
+    init(dateModels: [DayWorkModel]) {
+        self.dateModels = dateModels
+    }
     
     var body: some View {
         VStack {
             // 월 네비게이션
-            HStack {
-                Button { prevMonth() } label: {
-                    Image(systemName: "chevron.left")
-                }
-                Text(currentMonth, format: .dateTime.year().month())
-                Button { nextMonth() } label: {
-                    Image(systemName: "chevron.right")
-                }
-            }
+            VStack {
+                Text(currentMonth, format: .dateTime.year())
+                    .font(.system(size: FontSize.sm, weight: .light))
+                    .foregroundStyle(Color.System.text)
+                Text(currentMonth, format: .dateTime.month())
+                    .font(.system(size: FontSize.lg, weight: .light))
+                    .foregroundStyle(Color.System.text)
+            }.padding(20)
             
             // 요일 헤더
             LazyVGrid(columns: columns) {
-                ForEach(["일","월","화","수","목","금","토"], id: \.self) {
-                    Text($0).font(.caption)
+                ForEach(["SUN","MON","TUE","WEN","THU","FRI","SAT"], id: \.self) {
+                    Text($0)
+                        .font(.system(size: FontSize.sm, weight: .light))
+                        .foregroundStyle($0 == "SUN" ? .red : Color.System.text)
                 }
             }
             
@@ -40,7 +46,7 @@ struct CalendarView: View {
                         }
                 }
             }
-        }
+        }.background(Color.System.background)
     }
     
     func prevMonth() {
@@ -82,19 +88,34 @@ struct CalendarView: View {
 
 struct DayCell: View {
     let date: Date
-    var backgroundColor: Color = .red
-    var textColor: Color = .black
+    var backgroundColor: Color = .clear
+    var textColor: Color = Color.System.text
+    
+    private var bgColor: Color {
+            if date == Date.distantPast { return .clear }
+            if backgroundColor == .clear && Calendar.current.isDateInToday(date) {
+                return Color.System.sub
+            }
+            return backgroundColor
+        }
+    private var txtColor: Color {
+        if date == Date.distantPast { return .clear }
+        if textColor == .black && Calendar.current.isDateInToday(date) {
+            return .white
+        }
+        return textColor
+    }
     
     var body: some View {
         if date == Date.distantPast {
             Color.clear // 빈 셀
         } else {
             RoundedRectangle(cornerRadius: 8)
-                .fill(backgroundColor)
+                .fill(bgColor)
                 .overlay {
                     Text(date.day)
-                        .font(.system(size: FontSize.sm))
-                        .foregroundStyle(textColor)
+                        .font(.system(size: FontSize.sm, weight: .light))
+                        .foregroundStyle(txtColor)
                 }
                 .aspectRatio(1, contentMode: .fit)
         }
@@ -102,5 +123,5 @@ struct DayCell: View {
 }
 
 #Preview {
-    CalendarView()
+    CalendarView(dateModels: [])
 }

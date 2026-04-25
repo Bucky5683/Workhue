@@ -15,7 +15,7 @@ struct MenuButton: View {
         Button(action: action) {
             ZStack(alignment: .topTrailing) {
                 Image(systemName: "line.3.horizontal")
-                    .foregroundStyle(.black)
+                    .foregroundStyle(Color.System.text)
                 
                 if hasNotification {
                     Circle()

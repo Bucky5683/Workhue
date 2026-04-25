@@ -17,6 +17,14 @@ extension Color {
         let b = Double(int & 0xFF) / 255
         self.init(red: r, green: g, blue: b)
     }
+    
+    init(hex: String, darkHex: String) {
+        self.init((UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark
+                ? UIColor(hex: darkHex)  // 다크모드
+                : UIColor(hex: hex)  // 라이트모드
+        }))
+    }
 }
 
 extension Color {
@@ -56,5 +64,49 @@ extension Color {
     // MARK: - 해금 (실버)
     enum UnlockedSpecial {
         static let silver         = Color(hex: "C0C0C0")
+    }
+    
+    // MARK: - 시스템 컬러
+    enum System {
+        /// 메인 색상
+        /// - 라이트 모드: 포레스트 그린
+        /// - 다크 모드: 라이트 포레스트
+        static let main           = Color(hex: "4A7C59", darkHex: "6AAF80")
+        /// 서브 색상
+        /// - 라이트 모드: 세이지 그린
+        /// - 다크 모드: 딥 세이지
+        static let sub            = Color(hex: "8FBC94", darkHex: "5A8C63")
+        /// 배경 색상
+        /// - 라이트 모드: 웜 화이트
+        /// - 다크 모드: 딥 포레스트 블랙
+        static let background     = Color(hex: "FAFAF7", darkHex: "1C2B1E")
+        /// 포인트 텍스트 색상
+        /// - 라이트 모드: 다크 포레스트
+        /// - 다크 모드: 소프트 화이트
+        static let pointText      = Color(hex: "2D3A2E", darkHex: "E8F0E9")
+        /// 텍스트 색상
+        /// - 라이트 모드: 다크 포레스트
+        /// - 다크 모드: 소프트 화이트
+        static let text           = Color(hex: "000000", darkHex: "FFFFFF")
+        /// 포인트 색상
+        /// - 라이트 모드: 웜 피치
+        /// - 다크 모드: 딥 피치
+        static let point          = Color(hex: "E8A87C", darkHex: "D4845A")
+        /// 카드/서피스
+        /// - 라이트 모드: 라이트 세이지
+        /// - 다크 모드: 다크 세이지
+        static let card           = Color(hex: "F0F4F0", darkHex: "243328")
+    }
+}
+
+extension UIColor {
+    convenience init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let r = CGFloat((int >> 16) & 0xFF) / 255
+        let g = CGFloat((int >> 8) & 0xFF) / 255
+        let b = CGFloat(int & 0xFF) / 255
+        self.init(red: r, green: g, blue: b, alpha: 1)
     }
 }

@@ -23,6 +23,7 @@ struct AlertView: View {
                 if !model.title.isEmpty {
                     Text(model.title)
                         .font(.system(size: FontSize.lg, weight: .semibold))
+                        .foregroundStyle(Color.System.text)
                 }
                 
                 if !model.message.isEmpty {
@@ -60,7 +61,7 @@ struct AlertView: View {
                 }
             }
             .padding(24)
-            .background(.white)
+            .background(Color.System.background)
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .padding(.horizontal, 40)
             
@@ -92,9 +93,9 @@ struct AlertModel {
         cancelTitle: String = "취소",
         confirmAction: (() -> Void)? = nil,
         confirmforgroundColor: Color? = .white,
-        confirmbackgroundColor: Color? = .blue,
-        cancelforgroundColor: Color? = .black,
-        cancelbackgroundColor: Color? = .gray
+        confirmbackgroundColor: Color? = Color.System.main,
+        cancelforgroundColor: Color? = Color.System.text,
+        cancelbackgroundColor: Color? = Color.System.background
     ) {
         self.title = title
         self.message = message
