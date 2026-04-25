@@ -8,8 +8,13 @@
 import SwiftUI
 
 struct HomeView: View {
+    let screenId: ScreenID = .home
     var body: some View {
-        Text("hi")
+        VStack {
+            HeaderView(headerType: .home(false))
+                .frame(height: 56)
+            Spacer()
+        }
     }
 }
 #Preview {

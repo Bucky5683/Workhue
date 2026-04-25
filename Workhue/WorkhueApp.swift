@@ -21,6 +21,29 @@ struct WorkhueApp: App {
                             HomeView()
                         }
                     }
+                    .fullScreenCover(
+                        isPresented: .constant(router.presentedView != nil && router.presentationStyle == .fullScreen)
+                    ) {
+                        router.presentedView
+                    }
+                    .sheet(
+                        isPresented: .constant(router.presentedView != nil && router.presentationStyle == .sheet)
+                    ) {
+                        router.presentedView
+                    }
+                    .sheet(
+                        isPresented: .constant(router.presentedView != nil && router.presentationStyle == .popover)
+                    ) {
+                        router.presentedView
+                            .presentationDetents([.medium])
+                            .presentationCornerRadius(20)
+                    }
+                    .fullScreenCover(
+                        isPresented: .constant(router.presentedView != nil && router.presentationStyle == .overFullScreen)
+                    ) {
+                        router.presentedView
+                            .background(.clear)
+                    }
             }
         }
     }
