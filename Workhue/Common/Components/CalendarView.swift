@@ -21,11 +21,11 @@ struct CalendarView: View {
             // 월 네비게이션
             VStack {
                 Text(currentMonth, format: .dateTime.year())
-                    .font(.system(size: FontSize.sm, weight: .light))
-                    .foregroundStyle(Color.System.text)
+                    .font(.system(size: FontSize.sm, weight: .regular))
+                    .foregroundStyle(Color.System.pointText)
                 Text(currentMonth, format: .dateTime.month())
-                    .font(.system(size: FontSize.lg, weight: .light))
-                    .foregroundStyle(Color.System.text)
+                    .font(.system(size: FontSize.lg, weight: .regular))
+                    .foregroundStyle(Color.System.pointText)
             }.padding(20)
             
             // 요일 헤더
@@ -47,14 +47,30 @@ struct CalendarView: View {
                 }
             }
         }.background(Color.System.background)
+            .gesture(
+                DragGesture()
+                    .onEnded { value in
+                        if value.translation.width > 50 {
+                            // 왼->오 : 이전달
+                            prevMonth()
+                        } else if value.translation.width < -50 {
+                            // 오->왼 : 다음달
+                            nextMonth()
+                        }
+                    }
+            )
     }
     
     func prevMonth() {
-        currentMonth = Calendar.current.date(byAdding: .month, value: -1, to: currentMonth) ?? currentMonth
+        withAnimation(.easeOut){
+            currentMonth = Calendar.current.date(byAdding: .month, value: -1, to: currentMonth) ?? currentMonth
+        }
     }
     
     func nextMonth() {
-        currentMonth = Calendar.current.date(byAdding: .month, value: 1, to: currentMonth) ?? currentMonth
+        withAnimation(.easeOut){
+            currentMonth = Calendar.current.date(byAdding: .month, value: 1, to: currentMonth) ?? currentMonth
+        }
     }
     
     func loadCalendar() {
@@ -92,18 +108,11 @@ struct DayCell: View {
     var textColor: Color = Color.System.text
     
     private var bgColor: Color {
-            if date == Date.distantPast { return .clear }
-            if backgroundColor == .clear && Calendar.current.isDateInToday(date) {
-                return Color.System.sub
-            }
-            return backgroundColor
-        }
-    private var txtColor: Color {
         if date == Date.distantPast { return .clear }
-        if textColor == .black && Calendar.current.isDateInToday(date) {
-            return .white
+        if backgroundColor == .clear && Calendar.current.isDateInToday(date) {
+            return Color.System.sub
         }
-        return textColor
+        return backgroundColor
     }
     
     var body: some View {
@@ -115,7 +124,7 @@ struct DayCell: View {
                 .overlay {
                     Text(date.day)
                         .font(.system(size: FontSize.sm, weight: .light))
-                        .foregroundStyle(txtColor)
+                        .foregroundStyle(textColor)
                 }
                 .aspectRatio(1, contentMode: .fit)
         }

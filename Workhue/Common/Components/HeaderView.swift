@@ -34,6 +34,7 @@ struct HeaderView: View {
                     if !title.isEmpty {
                         Text(title)
                             .font(.system(size: FontSize.xxl, weight: .semibold))
+                            .foregroundStyle(Color.System.pointText)
                             .frame(maxHeight: .infinity)
                     }
                     Spacer()
@@ -43,6 +44,7 @@ struct HeaderView: View {
                     if !title.isEmpty {
                         Text(title)
                             .font(.system(size: FontSize.xxl, weight: .semibold))
+                            .foregroundStyle(Color.System.pointText)
                             .frame(maxHeight: .infinity)
                     }
                     Spacer()
