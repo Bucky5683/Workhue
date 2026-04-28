@@ -35,12 +35,14 @@ struct WorkTimeLineView: View {
             } else {
                 return "\(minutes)분 근무 중"
             }
-        case .notWorking:
+        case .afterWorking:
             if hours > 0 {
                 return "\(hours)시간 \(minutes)분 근무"
             } else {
                 return "\(minutes)분 근무"
             }
+        case .beforeWorking:
+            return "아직 근무 기록이 없어요."
         }
     }
     
@@ -120,14 +122,14 @@ struct WorkTimeLineView: View {
         WorkTimeLineView(
             checkIn: Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: Date()) ?? Date(),
             checkOut: Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: Date()) ?? Date(),
-            workState: .notWorking
+            workState: .afterWorking
         )
         
         // 미출근
         WorkTimeLineView(
             checkIn: nil,
             checkOut: nil,
-            workState: .notWorking
+            workState: .beforeWorking
         )
     }
 }

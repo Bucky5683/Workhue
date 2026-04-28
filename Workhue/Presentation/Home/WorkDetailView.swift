@@ -48,7 +48,7 @@ struct WorkDetailView: View {
             VStack(alignment: .trailing, spacing: 4) {
                 ZStack(alignment: .center) {
                     TextEditor(text: $text)
-                        .onChange(of: text) { _, newValue in
+                        .onChange(of: text) { newValue in
                             if newValue.count > 300 {
                                 text = String(newValue.prefix(300))
                             }
@@ -91,5 +91,5 @@ struct WorkDetailCheckList: View {
 }
 
 #Preview {
-    WorkDetailView(workModel: DayWorkModel(id: "", date: Date(), status: .notWorking, startTime: Calendar.current.date(bySettingHour: 6, minute: 0, second: 0, of: Date()) ?? Date(), endTime: Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: Date()) ?? Date()))
+    WorkDetailView(workModel: DayWorkModel(id: "", date: Date(), status: .afterWorking, startTime: Calendar.current.date(bySettingHour: 6, minute: 0, second: 0, of: Date()) ?? Date(), endTime: Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: Date()) ?? Date()))
 }
