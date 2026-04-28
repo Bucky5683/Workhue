@@ -70,5 +70,5 @@ extension HeaderView {
 }
 
 #Preview {
-    HeaderView(headerType: .modal("Ho"))
+    HeaderView(headerType: .back("Ho"))
 }
