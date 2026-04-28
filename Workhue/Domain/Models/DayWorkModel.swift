@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import SwiftUI
 
-struct DayWorkModel: Sendable {
+struct DayWorkModel: Hashable, Sendable {
     let id: String
     let date: Date
     let status: WorkStatus
@@ -20,7 +20,7 @@ struct DayWorkModel: Sendable {
     var checkList: [WorkCheckList] = []
 }
 
-struct WorkCheckList: Sendable {
+struct WorkCheckList: Hashable, Sendable {
     let id: String
     let content: String
     let isDone: Bool

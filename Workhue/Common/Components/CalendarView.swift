@@ -42,7 +42,8 @@ struct CalendarView: View {
                 ForEach(daysInMonth(), id: \.self) { date in
                     DayCell(date: date)
                         .onTapGesture {
-                            NavigationRouter.shared.push(.dayDetail(date))
+                            let data = dateModels.first { $0.date == date }
+                            NavigationRouter.shared.push(.dayDetail(data ?? DayWorkModel(id: "", date: date, status: .beforeWorking, startTime: nil, endTime: nil)))
                         }
                 }
             }

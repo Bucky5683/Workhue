@@ -17,6 +17,10 @@ struct WorkhueApp: App {
                 HomeView()
                     .navigationDestination(for: Route.self) { route in
                         switch route {
+                        case .dayDetail(let date):
+                            WorkDetailView(workModel: date)
+                        case .settings:
+                            SettingView()
                         default :
                             HomeView()
                         }

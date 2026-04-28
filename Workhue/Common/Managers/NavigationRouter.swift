@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 enum Route: Hashable {
-    case dayDetail(Date)
+    case dayDetail(DayWorkModel)
     case checkIn
     case checkOut
     case colorPicker
