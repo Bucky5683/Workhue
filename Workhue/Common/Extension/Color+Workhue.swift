@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 extension Color {
     init(hex: String) {
@@ -85,8 +86,8 @@ extension Color {
         /// - 다크 모드: 소프트 화이트
         static let pointText      = Color(hex: "2D3A2E", darkHex: "E8F0E9")
         /// 텍스트 색상
-        /// - 라이트 모드: 다크 포레스트
-        /// - 다크 모드: 소프트 화이트
+        /// - 라이트 모드: 검정색
+        /// - 다크 모드: 화이트
         static let text           = Color(hex: "000000", darkHex: "FFFFFF")
         /// 포인트 색상
         /// - 라이트 모드: 웜 피치

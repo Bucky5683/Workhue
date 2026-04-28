@@ -18,7 +18,6 @@ struct HomeView: View {
                 .frame(height: 30)
                 .foregroundStyle(.clear)
             CalendarView(dateModels: [])
-                .padding(20)
             HStack(spacing: 10) {
                 Text("🏃")
                     .font(.system(size: FontSize.md))
@@ -32,7 +31,7 @@ struct HomeView: View {
                 .underline()
                 .font(.system(size: FontSize.md))
                 .foregroundStyle(.gray)
-            }.padding(20)
+            }
             Spacer()
             // FAB 버튼
             Button {
@@ -45,8 +44,7 @@ struct HomeView: View {
                     .clipShape(Circle())
                     .shadow(radius: 4)
             }
-            .padding(24)
-        }.background(Color.System.background)
+        }.padding(20).background(Color.System.background)
     }
 }
 #Preview {

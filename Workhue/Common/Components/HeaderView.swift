@@ -27,7 +27,7 @@ struct HeaderView: View {
                         NavigationRouter.shared.pop()
                     } label: {
                         Image(systemName: "chevron.left")
-                            .foregroundStyle(.black)
+                            .foregroundStyle(Color.System.text)
                             .frame(maxHeight: .infinity)
                     }
                     .frame(maxHeight: .infinity)
@@ -52,13 +52,12 @@ struct HeaderView: View {
                         NavigationRouter.shared.pop()
                     } label: {
                         Image(systemName: "xmark")
-                            .foregroundStyle(.black)
+                            .foregroundStyle(Color.System.text)
                     }
                     .frame(maxHeight: .infinity)
                 }
             }
         }
-        .padding(.horizontal, 20)
     }
 }
 
