@@ -8,7 +8,7 @@
 import CloudKit
 
 final class DayWorkCloudDataSource {
-    private let container = CKContainer(identifier: "iCloud.com.seoyeon.Workhue")
+    private let container = CKContainer.default()
     private var database: CKDatabase { container.privateCloudDatabase }
     private let recordType = "DayWork"
 
