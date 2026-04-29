@@ -50,7 +50,9 @@ struct HomeView: View {
                         NavigationRouter.shared.push(.checkIn)
                     }
                 case .working:
-                    viewModel.checkOut()
+                    if let work = viewModel.todayWork {
+                        NavigationRouter.shared.push(.checkOut(work))
+                    }
                 case .afterWorking:
                     break
                 }

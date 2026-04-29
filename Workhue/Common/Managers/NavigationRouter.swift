@@ -4,7 +4,8 @@ import Combine
 enum Route: Hashable {
     case dayDetail(DayWorkModel)
     case checkIn
-    case checkOut
+    case checkOut(DayWorkModel)        // ← 추가
+    case checkOutReview(DayWorkModel)  // ← 추가
     case colorPicker
     case settings
 }

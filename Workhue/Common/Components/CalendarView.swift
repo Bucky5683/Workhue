@@ -47,7 +47,12 @@ struct CalendarView: View {
                         Color.clear
                             .aspectRatio(1, contentMode: .fit)
                     case .day(let date):
-                        DayCell(date: date)
+                        DayCell(
+                            date: date,
+                            backgroundColor: dateModels.first {
+                                Calendar.current.isDate($0.date, inSameDayAs: date)
+                            }?.workColor?.color ?? .clear
+                        )
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 let data = dateModels.first {

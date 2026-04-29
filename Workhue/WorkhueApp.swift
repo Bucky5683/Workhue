@@ -30,6 +30,10 @@ struct ContentView: View {
                         CheckInView()
                     case .dayDetail(let model):
                         WorkDetailView(workModel: model)
+                    case .checkOut(let model):
+                        CheckOutView(workModel: model)
+                    case .checkOutReview(let model):
+                        CheckOutReviewView(workModel: model)
                     case .settings:
                         SettingView()
                     default:
