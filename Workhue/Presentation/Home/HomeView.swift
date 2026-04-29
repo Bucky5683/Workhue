@@ -43,9 +43,16 @@ struct HomeView: View {
             
             Button {
                 switch viewModel.currentStatus {
-                case .beforeWorking: viewModel.checkIn()
-                case .working:       viewModel.checkOut()
-                case .afterWorking:  break
+                case .beforeWorking:
+                    // 오늘 날짜일 때만 출근 가능
+                    if Calendar.current.isDateInToday(viewModel.todayWork?.date ?? Date())
+                        || viewModel.todayWork == nil {
+                        NavigationRouter.shared.push(.checkIn)
+                    }
+                case .working:
+                    viewModel.checkOut()
+                case .afterWorking:
+                    break
                 }
             } label: {
                 Text(viewModel.currentStatus.icon)

@@ -26,6 +26,8 @@ struct ContentView: View {
             HomeView()
                 .navigationDestination(for: Route.self) { route in
                     switch route {
+                    case .checkIn:
+                        CheckInView()
                     case .dayDetail(let model):
                         WorkDetailView(workModel: model)
                     case .settings:
