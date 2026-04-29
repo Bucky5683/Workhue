@@ -19,7 +19,12 @@ struct HomeView: View {
                 .frame(height: 30)
                 .foregroundStyle(.clear)
             
-            CalendarView(dateModels: viewModel.allWorks)
+            CalendarView(
+                dateModels: viewModel.allWorks,
+                onSave: {
+                    viewModel.loadToday()  // ← 저장 후 캘린더 갱신
+                }
+            )
             
             HStack(spacing: 10) {
                 Text(viewModel.currentStatus.icon)

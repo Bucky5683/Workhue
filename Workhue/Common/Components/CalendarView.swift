@@ -11,9 +11,11 @@ struct CalendarView: View {
     @State private var currentMonth: Date = Date()
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
     let dateModels: [DayWorkModel]
+    let onSave: () -> Void  // ← 추가
     
-    init(dateModels: [DayWorkModel]) {
+    init(dateModels: [DayWorkModel], onSave: @escaping () -> Void) {
         self.dateModels = dateModels
+        self.onSave = onSave
     }
     
     var body: some View {
@@ -39,16 +41,37 @@ struct CalendarView: View {
             
             // 날짜 셀
             LazyVGrid(columns: columns) {
-                ForEach(daysInMonth(), id: \.self) { date in
-                    DayCell(date: date)
-                        .onTapGesture {
-                            let data = dateModels.first { $0.date == date }
-                            NavigationRouter.shared.push(.dayDetail(data ?? DayWorkModel(id: "", date: date, status: .beforeWorking, startTime: nil, endTime: nil)))
-                        }
+                ForEach(daysInMonth(), id: \.self) { calendarDay in
+                    switch calendarDay {
+                    case .empty:
+                        Color.clear
+                            .aspectRatio(1, contentMode: .fit)
+                    case .day(let date):
+                        DayCell(date: date)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                let data = dateModels.first {
+                                    Calendar.current.isDate($0.date, inSameDayAs: date)
+                                }
+                                NavigationRouter.shared.present(
+                                    WorkDetailView(
+                                        workModel: data ?? DayWorkModel(
+                                            id: date.formatted(.iso8601),
+                                            date: date,
+                                            status: .beforeWorking,
+                                            startTime: nil,
+                                            endTime: nil
+                                        ),
+                                        onSave: onSave  // ← 콜백 전달
+                                    ),
+                                    style: .sheet
+                                )
+                            }
+                    }
                 }
             }
         }.background(Color.System.background)
-            .gesture(
+            .simultaneousGesture(
                 DragGesture()
                     .onEnded { value in
                         if value.translation.width > 50 {
@@ -78,25 +101,25 @@ struct CalendarView: View {
         
     }
     
-    func daysInMonth() -> [Date] {
-        let calendar = Calendar.current
+    func daysInMonth() -> [CalendarDay] {
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone.current
         
-        // 해당 월의 첫째 날
-        let firstDay = calendar.date(from: calendar.dateComponents([.year, .month], from: currentMonth))!
+        var components = calendar.dateComponents([.year, .month], from: currentMonth)
+        components.day = 1
+        components.hour = 12
+        components.minute = 0
+        components.second = 0
         
-        // 해당 월의 날짜 수
+        let firstDay = calendar.date(from: components)!
         let range = calendar.range(of: .day, in: .month, for: currentMonth)!
-        
-        // 첫째 날의 요일 (일요일 = 0)
         let firstWeekday = calendar.component(.weekday, from: firstDay) - 1
         
-        // 앞에 빈 날짜 채우기
-        var days: [Date] = Array(repeating: Date.distantPast, count: firstWeekday)
+        var days: [CalendarDay] = (0..<firstWeekday).map { .empty($0) }  // 빈 셀 index로 구분
         
-        // 실제 날짜 채우기
         for day in 0..<range.count {
             let date = calendar.date(byAdding: .day, value: day, to: firstDay)!
-            days.append(date)
+            days.append(.day(date))
         }
         
         return days
@@ -109,7 +132,6 @@ struct DayCell: View {
     var textColor: Color = Color.System.text
     
     private var bgColor: Color {
-        if date == Date.distantPast { return .clear }
         if backgroundColor == .clear && Calendar.current.isDateInToday(date) {
             return Color.System.sub
         }
@@ -117,21 +139,17 @@ struct DayCell: View {
     }
     
     var body: some View {
-        if date == Date.distantPast {
-            Color.clear // 빈 셀
-        } else {
-            RoundedRectangle(cornerRadius: 8)
-                .fill(bgColor)
-                .overlay {
-                    Text(date.day)
-                        .font(.system(size: FontSize.sm, weight: .light))
-                        .foregroundStyle(textColor)
-                }
-                .aspectRatio(1, contentMode: .fit)
-        }
+        RoundedRectangle(cornerRadius: 8)
+            .fill(bgColor)
+            .overlay {
+                Text(date.day)
+                    .font(.system(size: FontSize.sm, weight: .light))
+                    .foregroundStyle(textColor)
+            }
+            .aspectRatio(1, contentMode: .fit)
     }
 }
 
 #Preview {
-    CalendarView(dateModels: [])
+    CalendarView(dateModels: [], onSave: {})
 }

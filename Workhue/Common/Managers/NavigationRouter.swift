@@ -28,6 +28,14 @@ final class NavigationRouter: ObservableObject {
         path.append(route)
     }
 
+    func close() {
+        if presentedView != nil {
+            dismiss()
+        } else {
+            pop()
+        }
+    }
+    
     func pop() {
         path.removeLast()
     }

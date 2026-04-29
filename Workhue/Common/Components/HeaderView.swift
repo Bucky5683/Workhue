@@ -49,7 +49,7 @@ struct HeaderView: View {
                     }
                     Spacer()
                     Button {
-                        NavigationRouter.shared.pop()
+                        NavigationRouter.shared.close()
                     } label: {
                         Image(systemName: "xmark")
                             .foregroundStyle(Color.System.text)

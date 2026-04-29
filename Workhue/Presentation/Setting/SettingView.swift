@@ -9,14 +9,7 @@ import SwiftUI
 
 struct SettingView: View {
     @State private var iCloudOn = false
-    @State private var totalNotiOn = false {
-        didSet {
-            if !totalNotiOn {
-                gettingWorkNotiOn = false
-                endWorkNotiOn = false
-            }
-        }
-    }
+    @State private var totalNotiOn = false
     @State private var gettingWorkNotiOn = false
     @State private var endWorkNotiOn = false
     var body: some View {
@@ -57,6 +50,12 @@ struct SettingView: View {
                 .foregroundStyle(Color.System.pointText)
                 .padding(.horizontal, 10)
                 .tint(Color.System.main)
+                .onChange(of: totalNotiOn) { newValue in
+                        if !newValue {
+                            gettingWorkNotiOn = false
+                            endWorkNotiOn = false
+                        }
+                    }
             Toggle("출근시간 알림 받기", isOn: $gettingWorkNotiOn)
                 .fontWeight(.medium)
                 .foregroundStyle(Color.System.pointText)
