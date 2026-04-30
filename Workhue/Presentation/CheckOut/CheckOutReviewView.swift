@@ -28,7 +28,7 @@ struct CheckOutReviewView: View {
                         VStack(alignment: .trailing, spacing: 4) {
                             ZStack(alignment: .topLeading) {
                                 TextEditor(text: $viewModel.remembrance)
-                                    .onChange(of: viewModel.remembrance) { newValue in
+                                    .onChange(of: viewModel.remembrance) { _, newValue in
                                         if newValue.count > 300 {
                                             viewModel.remembrance = String(newValue.prefix(300))
                                         }

@@ -30,6 +30,13 @@ struct WorkCheckListDTO: Codable {
         self.content = model.content
         self.isDone = model.isDone
     }
+    
+    // 기존 init(from model: WorkCheckList) 외에 아래 추가
+    init(id: String, content: String, isDone: Bool) {
+        self.id = id
+        self.content = content
+        self.isDone = isDone
+    }
 
     func toModel() -> WorkCheckList {
         WorkCheckList(id: id, content: content, isDone: isDone)

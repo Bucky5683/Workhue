@@ -6,17 +6,24 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct WorkhueApp: App {
     @StateObject private var router = NavigationRouter.shared
     @StateObject private var appThemeStore = AppThemeStore.shared
 
+    init() {
+        // UserDefaults → SwiftData 단 1회 마이그레이션
+        MigrationManager.migrateIfNeeded()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView(router: router)
                 .preferredColorScheme(appThemeStore.selectedMode.colorScheme)
                 .id(appThemeStore.selectedMode)
+                .modelContainer(SwiftDataManager.shared.container)
         }
     }
 }
