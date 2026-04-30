@@ -12,8 +12,8 @@ protocol StreakRepository {
     func loadUnlockedColors() async throws -> [WorkColor]
     func setHasNew(_ value: Bool) async throws
     func hasNewUnlock() async throws -> Bool
-    func saveCustomHex(_ hex: String)
-    func loadCustomHex() -> String?
+    func addCustomHex(_ hex: String)
+    func loadCustomHexList() -> [String]
 }
 
 final class StreakRepositoryImpl: StreakRepository {
@@ -56,12 +56,11 @@ final class StreakRepositoryImpl: StreakRepository {
         }
     }
 
-    // 커스텀 hex는 구독 여부 상관없이 항상 UserDefaults
-    func saveCustomHex(_ hex: String) {
-        local.saveCustomHex(hex)
+    func addCustomHex(_ hex: String) {
+        local.addCustomHex(hex)
     }
 
-    func loadCustomHex() -> String? {
-        local.loadCustomHex()
+    func loadCustomHexList() -> [String] {
+        local.loadCustomHexList()
     }
 }

@@ -11,7 +11,7 @@ struct StreakLocalDataSource {
 
     private let unlockedKey  = "unlockedColors"
     private let hasNewKey    = "unlockedColors.hasNew"
-    private let customHexKey = "customColor.hex"
+    private let customHexListKey = "customColor.hexList"
 
     func saveUnlockedColors(_ colors: [WorkColor]) {
         let rawValues = colors.map { $0.rawValue }
@@ -31,11 +31,20 @@ struct StreakLocalDataSource {
         UserDefaults.standard.bool(forKey: hasNewKey)
     }
 
-    func saveCustomHex(_ hex: String) {
-        UserDefaults.standard.set(hex, forKey: customHexKey)
+    func saveCustomHexList(_ hexList: [String]) {
+        UserDefaults.standard.set(hexList, forKey: customHexListKey)
     }
 
-    func loadCustomHex() -> String? {
-        UserDefaults.standard.string(forKey: customHexKey)
+    func loadCustomHexList() -> [String] {
+        UserDefaults.standard.stringArray(forKey: customHexListKey) ?? []
+    }
+
+    func addCustomHex(_ hex: String) {
+        var list = loadCustomHexList()
+        // 중복 제거
+        if !list.contains(hex.uppercased()) {
+            list.append(hex.uppercased())
+            saveCustomHexList(list)
+        }
     }
 }

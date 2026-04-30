@@ -13,7 +13,8 @@ final class UnlockedColorsViewModel: ObservableObject {
 
     @Published var unlockedColors: [WorkColor] = []
     @Published var isLoading: Bool = false
-
+    @Published var customHexList: [String] = []
+    
     private let streakRepo = StreakRepositoryImpl()
 
     var freeUnlockColors: [WorkColor] {
@@ -36,6 +37,7 @@ final class UnlockedColorsViewModel: ObservableObject {
         Task {
             isLoading = true
             unlockedColors = (try? await streakRepo.loadUnlockedColors()) ?? []
+            customHexList = streakRepo.loadCustomHexList()
             try? await streakRepo.setHasNew(false)
             isLoading = false
         }

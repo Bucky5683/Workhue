@@ -69,30 +69,45 @@ struct UnlockedColorsView: View {
                                     .foregroundStyle(.secondary)
                             }
 
-                            HStack(spacing: 12) {
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [.red, .orange, .yellow, .green, .blue, .purple],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                                    .frame(width: 56, height: 56)
-
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("커스텀")
-                                        .font(.system(size: FontSize.sm, weight: .semibold))
-                                        .foregroundStyle(Color.System.text)
-                                    Text("광고 1회 시청 후 사용 가능")
-                                        .font(.system(size: FontSize.xs))
-                                        .foregroundStyle(.secondary)
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 12) {
+                                // 저장된 커스텀 색상들
+                                ForEach(viewModel.customHexList, id: \.self) { hex in
+                                    VStack(spacing: 6) {
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color(hex: hex))
+                                            .frame(height: 56)
+                                        Text("#\(hex)")
+                                            .font(.system(size: FontSize.xs))
+                                            .foregroundStyle(Color.System.text)
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.7)
+                                    }
                                 }
-                                Spacer()
+                                Button {
+                                    // TODO: 탭 시 광고 시청 → hex 입력 → ColorPickerView TCA 구현 시 연결
+                                } label: {
+                                    // 추가 버튼
+                                    VStack(spacing: 6) {
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(
+                                                LinearGradient(
+                                                    colors: [.red, .orange, .yellow, .green, .blue, .purple],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                            )
+                                            .frame(height: 56)
+                                            .overlay {
+                                                Image(systemName: "plus")
+                                                    .font(.system(size: 20, weight: .bold))
+                                                    .foregroundStyle(.white)
+                                            }
+                                        Text("추가")
+                                            .font(.system(size: FontSize.xs))
+                                            .foregroundStyle(Color.System.text)
+                                    }
+                                }
                             }
-                            .padding(16)
-                            .background(Color.System.sub.opacity(0.3))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                     }
                     .padding(20)
