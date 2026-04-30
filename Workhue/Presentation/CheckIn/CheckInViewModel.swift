@@ -6,61 +6,53 @@
 //
 
 import Foundation
+import SwiftData
 import Combine
 
 @MainActor
 final class CheckInViewModel: ObservableObject {
 
-    // MARK: - Output
     @Published var checkInTime: Date = Date()
     @Published var goals: [GoalItem] = []
     @Published var isLoading: Bool = false
 
-    // MARK: - UseCase
     private let saveUseCase: SaveDayWorkUseCase
 
     init() {
-        let repo = DayWorkRepositoryImpl()
+        let repo = DayWorkRepositoryImpl(context: SwiftDataManager.shared.context)
         self.saveUseCase = SaveDayWorkUseCase(repository: repo)
     }
 
-    // MARK: - 목표 추가
     func addGoal() {
-        let newGoal = GoalItem(id: UUID().uuidString, content: "", isDone: false, isEditing: true)
-        goals.append(newGoal)
+        goals.append(GoalItem(id: UUID().uuidString, content: "", isDone: false, isEditing: true))
     }
 
-    // MARK: - 목표 내용 변경
     func updateGoal(id: String, content: String) {
         if let idx = goals.firstIndex(where: { $0.id == id }) {
             goals[idx].content = content
         }
     }
 
-    // MARK: - 목표 편집 완료 (엔터)
     func commitGoal(id: String) {
         if let idx = goals.firstIndex(where: { $0.id == id }) {
             if goals[idx].content.isEmpty {
-                goals.remove(at: idx)  // 내용 없으면 제거
+                goals.remove(at: idx)
             } else {
                 goals[idx].isEditing = false
             }
         }
     }
 
-    // MARK: - 목표 수정 모드
     func editGoal(id: String) {
         if let idx = goals.firstIndex(where: { $0.id == id }) {
             goals[idx].isEditing = true
         }
     }
 
-    // MARK: - 목표 삭제
     func deleteGoal(id: String) {
         goals.removeAll { $0.id == id }
     }
 
-    // MARK: - 출근 저장
     func checkIn() {
         Task {
             isLoading = true

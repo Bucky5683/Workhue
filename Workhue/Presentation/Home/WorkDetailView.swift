@@ -1,6 +1,5 @@
 import SwiftUI
-
-import SwiftUI
+import SwiftData
 
 struct WorkDetailView: View {
     let workModel: DayWorkModel
@@ -11,7 +10,7 @@ struct WorkDetailView: View {
     init(workModel: DayWorkModel, onSave: (() -> Void)? = nil) {
         self.workModel = workModel
         self.onSave = onSave
-        let repo = DayWorkRepositoryImpl()
+        let repo = DayWorkRepositoryImpl(context: SwiftDataManager.shared.context)  // 수정
         let saveUseCase = SaveDayWorkUseCase(repository: repo)
         _viewModel = StateObject(wrappedValue: WorkDetailViewModel(
             workModel: workModel,

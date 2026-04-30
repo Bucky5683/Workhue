@@ -8,7 +8,6 @@
 import Foundation
 import SwiftData
 
-// UserDefaults → SwiftData 단 1회 마이그레이션
 @MainActor
 struct MigrationManager {
 
@@ -17,51 +16,98 @@ struct MigrationManager {
     static func migrateIfNeeded() {
         guard !UserDefaults.standard.bool(forKey: migrationKey) else { return }
 
-        migrateDayWorkList()
-        migrateStreakData()
+        let dayWorkSuccess = migrateDayWorkList()
+        let streakSuccess = migrateStreakData()
 
-        UserDefaults.standard.set(true, forKey: migrationKey)
-        print("SwiftData 마이그레이션 완료")
+        // 둘 다 성공했을 때만 완료 플래그 저장
+        if dayWorkSuccess && streakSuccess {
+            UserDefaults.standard.set(true, forKey: migrationKey)
+            print("SwiftData 마이그레이션 완료")
+        } else {
+            print("SwiftData 마이그레이션 일부 실패 - 다음 실행 시 재시도")
+        }
     }
 
     // MARK: - DayWork 마이그레이션
-    private static func migrateDayWorkList() {
+    @discardableResult
+    private static func migrateDayWorkList() -> Bool {
         guard
             let data = UserDefaults.standard.data(forKey: "dayWorkList"),
             let dtos = try? JSONDecoder().decode([DayWorkDTO].self, from: data)
-        else { return }
+        else {
+            // UserDefaults에 데이터 없으면 성공으로 처리
+            return true
+        }
 
         let context = SwiftDataManager.shared.context
+
+        // 중복 insert 방지: 기존 id 목록 미리 조회
+        let existingIds: Set<String>
+        do {
+            let descriptor = FetchDescriptor<DayWorkEntity>()
+            existingIds = Set(try context.fetch(descriptor).map { $0.id })
+        } catch {
+            print("DayWork 기존 데이터 조회 실패: \(error)")
+            return false
+        }
+
         for dto in dtos {
+            guard !existingIds.contains(dto.id) else { continue }
             let entity = DayWorkEntity.from(dto)
             context.insert(entity)
         }
-        try? context.save()
-        // 마이그레이션 완료 후 UserDefaults 정리
-        UserDefaults.standard.removeObject(forKey: "dayWorkList")
-        print("DayWork \(dtos.count)개 마이그레이션 완료")
+
+        do {
+            try context.save()
+            UserDefaults.standard.removeObject(forKey: "dayWorkList")
+            print("DayWork \(dtos.count)개 마이그레이션 완료")
+            return true
+        } catch {
+            print("DayWork 마이그레이션 저장 실패: \(error)")
+            return false
+        }
     }
 
     // MARK: - Streak 데이터 마이그레이션
-    private static func migrateStreakData() {
+    @discardableResult
+    private static func migrateStreakData() -> Bool {
         let unlockedColors = UserDefaults.standard.stringArray(forKey: "unlockedColors") ?? []
         let hasNew = UserDefaults.standard.bool(forKey: "unlockedColors.hasNew")
         let customHexList = UserDefaults.standard.stringArray(forKey: "customColor.hexList") ?? []
 
-        guard !unlockedColors.isEmpty || hasNew || !customHexList.isEmpty else { return }
+        guard !unlockedColors.isEmpty || hasNew || !customHexList.isEmpty else {
+            return true
+        }
 
         let context = SwiftDataManager.shared.context
-        let entity = StreakDataEntity()
-        entity.unlockedColors = unlockedColors
-        entity.hasNewUnlock = hasNew
-        entity.customHexList = customHexList
-        context.insert(entity)
-        try? context.save()
 
-        // 마이그레이션 완료 후 UserDefaults 정리
-        UserDefaults.standard.removeObject(forKey: "unlockedColors")
-        UserDefaults.standard.removeObject(forKey: "unlockedColors.hasNew")
-        UserDefaults.standard.removeObject(forKey: "customColor.hexList")
-        print("Streak 데이터 마이그레이션 완료")
+        do {
+            // 중복 방지: id "streakData" 이미 있으면 skip
+            let predicate = #Predicate<StreakDataEntity> { $0.id == "streakData" }
+            let descriptor = FetchDescriptor<StreakDataEntity>(predicate: predicate)
+            if try context.fetch(descriptor).first != nil {
+                // 이미 존재하면 UserDefaults만 정리
+                UserDefaults.standard.removeObject(forKey: "unlockedColors")
+                UserDefaults.standard.removeObject(forKey: "unlockedColors.hasNew")
+                UserDefaults.standard.removeObject(forKey: "customColor.hexList")
+                return true
+            }
+
+            let entity = StreakDataEntity()
+            entity.unlockedColors = unlockedColors
+            entity.hasNewUnlock = hasNew
+            entity.customHexList = customHexList
+            context.insert(entity)
+
+            try context.save()
+            UserDefaults.standard.removeObject(forKey: "unlockedColors")
+            UserDefaults.standard.removeObject(forKey: "unlockedColors.hasNew")
+            UserDefaults.standard.removeObject(forKey: "customColor.hexList")
+            print("Streak 데이터 마이그레이션 완료")
+            return true
+        } catch {
+            print("Streak 마이그레이션 저장 실패: \(error)")
+            return false
+        }
     }
 }

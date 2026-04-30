@@ -10,13 +10,16 @@ import SwiftData
 
 struct StreakLocalDataSource {
 
-    private var context: ModelContext {
-        SwiftDataManager.shared.context
+    private let context: ModelContext
+
+    init(context: ModelContext) {
+        self.context = context
     }
 
     // MARK: - 단일 StreakDataEntity fetch or create
     private func fetchOrCreate() throws -> StreakDataEntity {
-        let descriptor = FetchDescriptor<StreakDataEntity>()
+        let predicate = #Predicate<StreakDataEntity> { $0.id == "streakData" }
+        let descriptor = FetchDescriptor<StreakDataEntity>(predicate: predicate)
         if let existing = try context.fetch(descriptor).first {
             return existing
         }

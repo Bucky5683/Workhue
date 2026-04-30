@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import SwiftData
 
 @MainActor
 final class CheckOutReviewViewModel: ObservableObject {
@@ -19,17 +20,19 @@ final class CheckOutReviewViewModel: ObservableObject {
     private let workModel: DayWorkModel
     private let saveUseCase: SaveDayWorkUseCase
     private let getUseCase: GetDayWorkUseCase
+    private let streakRepo: StreakRepositoryImpl
     private let openAI = OpenAIManager.shared
 
     init(workModel: DayWorkModel) {
         self.workModel = workModel
         self.remembrance = workModel.remembrance ?? ""
-        let repo = DayWorkRepositoryImpl()
+        let context = SwiftDataManager.shared.context
+        let repo = DayWorkRepositoryImpl(context: context)
         self.saveUseCase = SaveDayWorkUseCase(repository: repo)
         self.getUseCase = GetDayWorkUseCase(repository: repo)
+        self.streakRepo = StreakRepositoryImpl(context: context)
     }
 
-    // MARK: - 회고 분석
     func analyzeRemembrance() {
         guard !remembrance.isEmpty else { return }
         Task {
@@ -44,12 +47,10 @@ final class CheckOutReviewViewModel: ObservableObject {
         }
     }
 
-    // MARK: - 색상 변경
     func changeColor(_ color: WorkColor) {
         analyzedColor = color
     }
 
-    // MARK: - 퇴근 저장
     func checkOut() {
         Task {
             isLoading = true
@@ -76,7 +77,6 @@ final class CheckOutReviewViewModel: ObservableObject {
         }
     }
 
-    // MARK: - 연속 기록 체크
     @discardableResult
     private func checkStreak() async -> Bool {
         let records = (try? await getUseCase.executeAll()) ?? []
@@ -86,7 +86,6 @@ final class CheckOutReviewViewModel: ObservableObject {
             isSubscriber: SubscriptionManager.shared.isSubscribed
         )
 
-        let streakRepo = StreakRepositoryImpl()
         let alreadyUnlocked = (try? await streakRepo.loadUnlockedColors()) ?? []
         let newColors = UnlockColorUseCase().execute(
             result: streakResult,

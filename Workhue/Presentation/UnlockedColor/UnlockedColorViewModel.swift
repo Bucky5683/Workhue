@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 import Combine
 
 @MainActor
@@ -14,20 +15,16 @@ final class UnlockedColorsViewModel: ObservableObject {
     @Published var unlockedColors: [WorkColor] = []
     @Published var isLoading: Bool = false
     @Published var customHexList: [String] = []
-    
-    private let streakRepo = StreakRepositoryImpl()
 
-    var freeUnlockColors: [WorkColor] {
-        [.gold, .roseGold, .forestGreen, .sunsetOrange]
+    private let streakRepo: StreakRepositoryImpl
+
+    init() {
+        self.streakRepo = StreakRepositoryImpl(context: SwiftDataManager.shared.context)
     }
 
-    var pastelUnlockColors: [WorkColor] {
-        [.pink, .mint, .lilac, .peach]
-    }
-
-    var hologramUnlockColors: [WorkColor] {
-        [.hologramPink, .hologramOcean, .hologramSunset]
-    }
+    var freeUnlockColors: [WorkColor] { [.gold, .roseGold, .forestGreen, .sunsetOrange] }
+    var pastelUnlockColors: [WorkColor] { [.pink, .mint, .lilac, .peach] }
+    var hologramUnlockColors: [WorkColor] { [.hologramPink, .hologramOcean, .hologramSunset] }
 
     func isUnlocked(_ color: WorkColor) -> Bool {
         unlockedColors.contains(color)

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 
 protocol DayWorkRepository {
     func fetch(by date: Date) async throws -> DayWorkModel?
@@ -15,10 +16,14 @@ protocol DayWorkRepository {
 }
 
 final class DayWorkRepositoryImpl: DayWorkRepository {
-    private let localDataSource = DayWorkLocalDataSource()
+    private let localDataSource: DayWorkLocalDataSource
     private let cloudDataSource = DayWorkCloudDataSource()
     private var useICloud: Bool {
         SubscriptionManager.shared.useICloud
+    }
+
+    init(context: ModelContext) {
+        self.localDataSource = DayWorkLocalDataSource(context: context)
     }
 
     func fetch(by date: Date) async throws -> DayWorkModel? {

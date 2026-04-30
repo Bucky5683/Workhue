@@ -9,11 +9,11 @@ import Foundation
 import Combine
 import UserNotifications
 import UIKit
+import SwiftData
 
 @MainActor
 final class SettingViewModel: ObservableObject {
 
-    // MARK: - Published
     @Published var isSubscribed: Bool = false
     @Published var iCloudOn: Bool = false
     @Published var totalNotiOn: Bool = false
@@ -28,32 +28,29 @@ final class SettingViewModel: ObservableObject {
     ) ?? Date()
     @Published var notificationDenied: Bool = false
 
-    // MARK: - Manager
     private let subscriptionManager = SubscriptionManager.shared
     private let notificationManager = NotificationManager.shared
-    private let streakRepo = StreakRepositoryImpl()
+    private let streakRepo: StreakRepositoryImpl
     private let defaults = UserDefaults.standard
     private var cancellables = Set<AnyCancellable>()
 
-    // MARK: - UserDefaults Keys
     private let totalNotiKey       = "totalNotiOn"
     private let gettingWorkNotiKey = "gettingWorkNotiOn"
     private let endWorkNotiKey     = "endWorkNotiOn"
     private let gettingWorkTimeKey = "gettingWorkTime"
     private let endWorkTimeKey     = "endWorkTime"
 
-    // MARK: - iCloud 연동 (SubscriptionManager 단일 소스)
     var isICloudEnabled: Bool {
         get { SubscriptionManager.shared.isICloudEnabled }
         set { SubscriptionManager.shared.isICloudEnabled = newValue }
     }
 
     init() {
+        self.streakRepo = StreakRepositoryImpl(context: SwiftDataManager.shared.context)
         loadSavedSettings()
         observeSubscription()
     }
 
-    // MARK: - 저장된 설정 불러오기
     private func loadSavedSettings() {
         isSubscribed = subscriptionManager.isSubscribed
         iCloudOn = subscriptionManager.isICloudEnabled
@@ -69,7 +66,6 @@ final class SettingViewModel: ObservableObject {
         }
     }
 
-    // MARK: - 구독 상태 감지
     private func observeSubscription() {
         subscriptionManager.$isSubscribed
             .receive(on: DispatchQueue.main)
@@ -80,20 +76,17 @@ final class SettingViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    // MARK: - new! 뱃지 로드
     func loadHasNewUnlock() {
         Task {
             hasNewUnlock = (try? await streakRepo.hasNewUnlock()) ?? false
         }
     }
 
-    // MARK: - iCloud 설정
     func setICloud(_ value: Bool) {
         iCloudOn = value
         subscriptionManager.isICloudEnabled = value
     }
 
-    // MARK: - 알림 전체 설정
     func setTotalNoti(_ value: Bool) {
         if !value {
             gettingWorkNotiOn = false
@@ -105,7 +98,6 @@ final class SettingViewModel: ObservableObject {
             defaults.set(false, forKey: totalNotiKey)
             return
         }
-
         Task { @MainActor in
             let status = await notificationManager.checkAuthorizationStatus()
             switch status {
@@ -146,41 +138,27 @@ final class SettingViewModel: ObservableObject {
         )
     }
 
-    // MARK: - 출근 알림 설정
     func setGettingWorkNoti(_ value: Bool) {
         gettingWorkNotiOn = value
         defaults.set(value, forKey: gettingWorkNotiKey)
-        if value {
-            notificationManager.scheduleCheckInNotification(at: gettingWorkTime)
-        } else {
-            notificationManager.removeCheckInNotification()
-        }
+        if value { notificationManager.scheduleCheckInNotification(at: gettingWorkTime) }
+        else { notificationManager.removeCheckInNotification() }
     }
 
-    // MARK: - 퇴근 알림 설정
     func setEndWorkNoti(_ value: Bool) {
         endWorkNotiOn = value
         defaults.set(value, forKey: endWorkNotiKey)
-        if value {
-            notificationManager.scheduleCheckOutNotification(at: endWorkTime)
-        } else {
-            notificationManager.removeCheckOutNotification()
-        }
+        if value { notificationManager.scheduleCheckOutNotification(at: endWorkTime) }
+        else { notificationManager.removeCheckOutNotification() }
     }
 
-    // MARK: - 출근 알림 시간 저장
     func saveGettingWorkTime() {
         defaults.set(gettingWorkTime, forKey: gettingWorkTimeKey)
-        if gettingWorkNotiOn {
-            notificationManager.scheduleCheckInNotification(at: gettingWorkTime)
-        }
+        if gettingWorkNotiOn { notificationManager.scheduleCheckInNotification(at: gettingWorkTime) }
     }
 
-    // MARK: - 퇴근 알림 시간 저장
     func saveEndWorkTime() {
         defaults.set(endWorkTime, forKey: endWorkTimeKey)
-        if endWorkNotiOn {
-            notificationManager.scheduleCheckOutNotification(at: endWorkTime)
-        }
+        if endWorkNotiOn { notificationManager.scheduleCheckOutNotification(at: endWorkTime) }
     }
 }

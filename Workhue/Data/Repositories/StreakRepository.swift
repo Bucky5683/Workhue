@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 
 protocol StreakRepository {
     func saveUnlockedColors(_ colors: [WorkColor]) async throws
@@ -17,58 +18,43 @@ protocol StreakRepository {
 }
 
 final class StreakRepositoryImpl: StreakRepository {
-
-    private let local = StreakLocalDataSource()
+    private let local: StreakLocalDataSource
     private let cloud = StreakCloudDataSource()
     private var useICloud: Bool {
         SubscriptionManager.shared.useICloud
     }
 
+    init(context: ModelContext) {
+        self.local = StreakLocalDataSource(context: context)
+    }
+
     func saveUnlockedColors(_ colors: [WorkColor]) async throws {
-        if useICloud {
-            try await cloud.saveUnlockedColors(colors)
-        } else {
-            local.saveUnlockedColors(colors)
-        }
+        if useICloud { try await cloud.saveUnlockedColors(colors) }
+        else { local.saveUnlockedColors(colors) }
     }
 
     func loadUnlockedColors() async throws -> [WorkColor] {
-        if useICloud {
-            return try await cloud.loadUnlockedColors()
-        } else {
-            return local.loadUnlockedColors()
-        }
+        if useICloud { return try await cloud.loadUnlockedColors() }
+        else { return local.loadUnlockedColors() }
     }
 
     func setHasNew(_ value: Bool) async throws {
-        if useICloud {
-            try await cloud.setHasNew(value)
-        } else {
-            local.setHasNew(value)
-        }
+        if useICloud { try await cloud.setHasNew(value) }
+        else { local.setHasNew(value) }
     }
 
     func hasNewUnlock() async throws -> Bool {
-        if useICloud {
-            return try await cloud.hasNewUnlock()
-        } else {
-            return local.hasNewUnlock()
-        }
+        if useICloud { return try await cloud.hasNewUnlock() }
+        else { return local.hasNewUnlock() }
     }
 
     func addCustomHex(_ hex: String) async throws {
-        if useICloud {
-            try await cloud.addCustomHex(hex)
-        } else {
-            local.addCustomHex(hex)
-        }
+        if useICloud { try await cloud.addCustomHex(hex) }
+        else { local.addCustomHex(hex) }
     }
 
     func loadCustomHexList() async throws -> [String] {
-        if useICloud {
-            return try await cloud.loadCustomHexList()
-        } else {
-            return local.loadCustomHexList()
-        }
+        if useICloud { return try await cloud.loadCustomHexList() }
+        else { return local.loadCustomHexList() }
     }
 }

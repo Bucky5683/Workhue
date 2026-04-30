@@ -8,12 +8,14 @@
 import Foundation
 import SwiftData
 
-// 앱 전체에서 단일 레코드로 관리
 @Model
 class StreakDataEntity {
+    @Attribute(.unique) var id: String
     var unlockedColors: [String] = []
     var hasNewUnlock: Bool = false
     var customHexList: [String] = []
 
-    init() { }
+    init(id: String = "streakData") {
+        self.id = id
+    }
 }

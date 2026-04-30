@@ -10,8 +10,10 @@ import SwiftData
 
 struct DayWorkLocalDataSource {
 
-    private var context: ModelContext {
-        SwiftDataManager.shared.context
+    private let context: ModelContext
+
+    init(context: ModelContext) {
+        self.context = context
     }
 
     // MARK: - 전체 조회
@@ -45,7 +47,6 @@ struct DayWorkLocalDataSource {
         descriptor.fetchLimit = 1
 
         if let existing = try context.fetch(descriptor).first {
-            // 기존 레코드 업데이트
             existing.status = dto.status
             existing.startTime = dto.startTime
             existing.endTime = dto.endTime
@@ -57,7 +58,6 @@ struct DayWorkLocalDataSource {
                 WorkCheckListEntity(id: $0.id, content: $0.content, isDone: $0.isDone)
             }
         } else {
-            // 신규 삽입
             let entity = DayWorkEntity.from(dto)
             context.insert(entity)
         }

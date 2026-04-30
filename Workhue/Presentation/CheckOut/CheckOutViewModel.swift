@@ -6,12 +6,12 @@
 //
 
 import Foundation
+import SwiftData
 import Combine
 
 @MainActor
 final class CheckOutViewModel: ObservableObject {
 
-    // MARK: - Output
     @Published var checkOutTime: Date = Date()
     @Published var goals: [GoalItem] = []
     @Published var isLoading: Bool = false
@@ -25,18 +25,16 @@ final class CheckOutViewModel: ObservableObject {
         self.goals = workModel.checkList.map {
             GoalItem(id: $0.id, content: $0.content, isDone: $0.isDone, isEditing: false)
         }
-        let repo = DayWorkRepositoryImpl()
+        let repo = DayWorkRepositoryImpl(context: SwiftDataManager.shared.context)
         self.saveUseCase = SaveDayWorkUseCase(repository: repo)
     }
 
-    // MARK: - 목표 체크 토글
     func toggleGoal(id: String) {
         if let idx = goals.firstIndex(where: { $0.id == id }) {
             goals[idx].isDone.toggle()
         }
     }
 
-    // MARK: - 다음 버튼 → CheckOutReviewView로 넘길 모델 생성
     func makeUpdatedModel() -> DayWorkModel {
         DayWorkModel(
             id: workModel.id,
