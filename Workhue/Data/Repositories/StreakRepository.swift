@@ -12,8 +12,8 @@ protocol StreakRepository {
     func loadUnlockedColors() async throws -> [WorkColor]
     func setHasNew(_ value: Bool) async throws
     func hasNewUnlock() async throws -> Bool
-    func addCustomHex(_ hex: String)
-    func loadCustomHexList() -> [String]
+    func addCustomHex(_ hex: String) async throws
+    func loadCustomHexList() async throws -> [String]
 }
 
 final class StreakRepositoryImpl: StreakRepository {
@@ -56,11 +56,19 @@ final class StreakRepositoryImpl: StreakRepository {
         }
     }
 
-    func addCustomHex(_ hex: String) {
-        local.addCustomHex(hex)
+    func addCustomHex(_ hex: String) async throws {
+        if useICloud {
+            try await cloud.addCustomHex(hex)
+        } else {
+            local.addCustomHex(hex)
+        }
     }
 
-    func loadCustomHexList() -> [String] {
-        local.loadCustomHexList()
+    func loadCustomHexList() async throws -> [String] {
+        if useICloud {
+            return try await cloud.loadCustomHexList()
+        } else {
+            return local.loadCustomHexList()
+        }
     }
 }

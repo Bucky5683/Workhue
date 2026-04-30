@@ -37,7 +37,7 @@ final class UnlockedColorsViewModel: ObservableObject {
         Task {
             isLoading = true
             unlockedColors = (try? await streakRepo.loadUnlockedColors()) ?? []
-            customHexList = streakRepo.loadCustomHexList()
+            customHexList = (try? await streakRepo.loadCustomHexList()) ?? []
             try? await streakRepo.setHasNew(false)
             isLoading = false
         }
