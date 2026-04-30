@@ -30,7 +30,7 @@ final class CheckOutReviewViewModel: ObservableObject {
     }
 
     // MARK: - 회고 분석
-    func analyzeRememrance() {
+    func analyzeRemembrance() {
         guard !remembrance.isEmpty else { return }
         Task {
             isAnalyzing = true
@@ -66,7 +66,6 @@ final class CheckOutReviewViewModel: ObservableObject {
             do {
                 try await saveUseCase.execute(updated)
                 let hasReward = await checkStreak()
-                // 해금 팝업 없을 때만 바로 홈으로
                 if !hasReward {
                     NavigationRouter.shared.popToRoot()
                 }
@@ -80,8 +79,6 @@ final class CheckOutReviewViewModel: ObservableObject {
     // MARK: - 스트릭 체크
     @discardableResult
     private func checkStreak() async -> Bool {
-        let repo = DayWorkRepositoryImpl()
-        let getUseCase = GetDayWorkUseCase(repository: repo)
         let records = (try? await getUseCase.executeAll()) ?? []
 
         let streakResult = CheckStreakUseCase().execute(
@@ -96,6 +93,16 @@ final class CheckOutReviewViewModel: ObservableObject {
             isSubscriber: SubscriptionManager.shared.isSubscribed,
             alreadyUnlocked: alreadyUnlocked
         )
+
+        // 커스텀 색상 해금 조건 체크 (업무 + 감정 동시 3일, 구독자 전용)
+        if SubscriptionManager.shared.isSubscribed,
+           streakResult.workStreak >= 3,
+           streakResult.emotionStreak >= 3 {
+            let isUnlocked = (try? await streakRepo.isCustomColorUnlocked()) ?? false
+            if !isUnlocked {
+                try? await streakRepo.setCustomColorUnlocked(true)
+            }
+        }
 
         if !newColors.isEmpty {
             try? await streakRepo.saveUnlockedColors(alreadyUnlocked + newColors)

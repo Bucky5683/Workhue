@@ -56,7 +56,7 @@ struct CheckOutReviewView: View {
                         // 확인 버튼 (AI 분석)
                         if viewModel.analyzedColor == nil {
                             Button {
-                                viewModel.analyzeRememrance()
+                                viewModel.analyzeRemembrance()
                             } label: {
                                 Text("확인")
                                     .font(.system(size: FontSize.lg, weight: .semibold))

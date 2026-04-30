@@ -38,6 +38,7 @@ final class NavigationRouter: ObservableObject {
     }
     
     func pop() {
+        guard !path.isEmpty else { return }
         path.removeLast()
     }
 

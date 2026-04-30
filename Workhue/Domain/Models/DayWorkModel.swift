@@ -6,8 +6,6 @@
 //
 
 import Foundation
-import Combine
-import SwiftUI
 
 struct DayWorkModel: Hashable, Sendable {
     let id: String
