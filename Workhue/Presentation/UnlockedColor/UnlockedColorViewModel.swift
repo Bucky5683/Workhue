@@ -19,7 +19,8 @@ final class UnlockedColorsViewModel: ObservableObject {
     private let streakRepo: StreakRepositoryImpl
 
     init() {
-        self.streakRepo = StreakRepositoryImpl(context: SwiftDataManager.shared.context)
+        let context = SwiftDataManager.shared.context
+        self.streakRepo = StreakRepositoryImpl(context: context)
     }
 
     var freeUnlockColors: [WorkColor] { [.gold, .roseGold, .forestGreen, .sunsetOrange] }

@@ -59,6 +59,9 @@ struct ContentView: View {
 
                     case .appTheme:
                         AppThemeView()
+                        
+                    case .subscription:
+                        SubscriptionView()
                     }
                 }
                 .sheet(

@@ -19,7 +19,9 @@ final class CheckInViewModel: ObservableObject {
     private let saveUseCase: SaveDayWorkUseCase
 
     init() {
-        let repo = DayWorkRepositoryImpl(context: SwiftDataManager.shared.context)
+        // ViewModel init에서
+        let context = SwiftDataManager.shared.context  // 한 번만
+        let repo = DayWorkRepositoryImpl(context: context)
         self.saveUseCase = SaveDayWorkUseCase(repository: repo)
     }
 

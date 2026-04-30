@@ -46,7 +46,8 @@ final class SettingViewModel: ObservableObject {
     }
 
     init() {
-        self.streakRepo = StreakRepositoryImpl(context: SwiftDataManager.shared.context)
+        let context = SwiftDataManager.shared.context
+        self.streakRepo = StreakRepositoryImpl(context: context)
         loadSavedSettings()
         observeSubscription()
     }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SettingView: View {
     @StateObject private var viewModel = SettingViewModel()
@@ -21,9 +22,9 @@ struct SettingView: View {
                     .foregroundStyle(Color.System.text)
                 Spacer()
                 Button {
-                    // 구독 화면으로 이동
+                    NavigationRouter.shared.push(.subscription)
                 } label: {
-                    Text(viewModel.isSubscribed ? "Premium" : "Free")
+                    Text(viewModel.isSubscribed ? "Pro" : "Free")
                         .font(.system(size: FontSize.sm, weight: .regular))
                         .foregroundStyle(Color.System.text)
                         .padding(.horizontal, 12)
@@ -207,4 +208,5 @@ struct TimePickerSheet: View {
 
 #Preview {
     SettingView()
+        .modelContainer(SwiftDataManager.preview.container)
 }

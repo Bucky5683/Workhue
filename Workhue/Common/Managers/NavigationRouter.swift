@@ -10,6 +10,7 @@ enum Route: Hashable {
     case settings
     case unlockedColors
     case appTheme
+    case subscription
 }
 
 enum PresentationStyle {
