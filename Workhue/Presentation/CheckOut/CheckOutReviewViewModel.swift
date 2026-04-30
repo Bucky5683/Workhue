@@ -65,8 +65,11 @@ final class CheckOutReviewViewModel: ObservableObject {
             )
             do {
                 try await saveUseCase.execute(updated)
-                await checkStreak()
-                NavigationRouter.shared.popToRoot()
+                let hasReward = await checkStreak()
+                // 해금 팝업 없을 때만 바로 홈으로
+                if !hasReward {
+                    NavigationRouter.shared.popToRoot()
+                }
             } catch {
                 print("퇴근 저장 실패: \(error)")
             }
@@ -75,7 +78,8 @@ final class CheckOutReviewViewModel: ObservableObject {
     }
 
     // MARK: - 스트릭 체크
-    private func checkStreak() async {
+    @discardableResult
+    private func checkStreak() async -> Bool {
         let repo = DayWorkRepositoryImpl()
         let getUseCase = GetDayWorkUseCase(repository: repo)
         let records = (try? await getUseCase.executeAll()) ?? []
@@ -96,7 +100,18 @@ final class CheckOutReviewViewModel: ObservableObject {
         if !newColors.isEmpty {
             try? await streakRepo.saveUnlockedColors(alreadyUnlocked + newColors)
             try? await streakRepo.setHasNew(true)
-            // TODO: StreakRewardView 팝업 트리거
+            NavigationRouter.shared.present(
+                StreakRewardView(
+                    unlockedColors: newColors,
+                    onConfirm: {
+                        NavigationRouter.shared.dismiss()
+                        NavigationRouter.shared.popToRoot()
+                    }
+                ),
+                style: .overFullScreen
+            )
+            return true
         }
+        return false
     }
 }
