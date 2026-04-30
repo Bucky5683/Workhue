@@ -30,7 +30,7 @@ final class StreakRepositoryImpl: StreakRepository {
 
     func saveUnlockedColors(_ colors: [WorkColor]) async throws {
         if useICloud { try await cloud.saveUnlockedColors(colors) }
-        else { local.saveUnlockedColors(colors) }
+        else { try local.saveUnlockedColors(colors) }
     }
 
     func loadUnlockedColors() async throws -> [WorkColor] {
@@ -40,7 +40,7 @@ final class StreakRepositoryImpl: StreakRepository {
 
     func setHasNew(_ value: Bool) async throws {
         if useICloud { try await cloud.setHasNew(value) }
-        else { local.setHasNew(value) }
+        else { try local.setHasNew(value) }
     }
 
     func hasNewUnlock() async throws -> Bool {
@@ -50,7 +50,7 @@ final class StreakRepositoryImpl: StreakRepository {
 
     func addCustomHex(_ hex: String) async throws {
         if useICloud { try await cloud.addCustomHex(hex) }
-        else { local.addCustomHex(hex) }
+        else { try local.addCustomHex(hex) }
     }
 
     func loadCustomHexList() async throws -> [String] {

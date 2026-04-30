@@ -19,7 +19,6 @@ struct MigrationManager {
         let dayWorkSuccess = migrateDayWorkList()
         let streakSuccess = migrateStreakData()
 
-        // 둘 다 성공했을 때만 완료 플래그 저장
         if dayWorkSuccess && streakSuccess {
             UserDefaults.standard.set(true, forKey: migrationKey)
             print("SwiftData 마이그레이션 완료")
@@ -35,13 +34,11 @@ struct MigrationManager {
             let data = UserDefaults.standard.data(forKey: "dayWorkList"),
             let dtos = try? JSONDecoder().decode([DayWorkDTO].self, from: data)
         else {
-            // UserDefaults에 데이터 없으면 성공으로 처리
             return true
         }
 
         let context = SwiftDataManager.shared.context
 
-        // 중복 insert 방지: 기존 id 목록 미리 조회
         let existingIds: Set<String>
         do {
             let descriptor = FetchDescriptor<DayWorkEntity>()
@@ -82,22 +79,21 @@ struct MigrationManager {
         let context = SwiftDataManager.shared.context
 
         do {
-            // 중복 방지: id "streakData" 이미 있으면 skip
             let predicate = #Predicate<StreakDataEntity> { $0.id == "streakData" }
             let descriptor = FetchDescriptor<StreakDataEntity>(predicate: predicate)
-            if try context.fetch(descriptor).first != nil {
-                // 이미 존재하면 UserDefaults만 정리
-                UserDefaults.standard.removeObject(forKey: "unlockedColors")
-                UserDefaults.standard.removeObject(forKey: "unlockedColors.hasNew")
-                UserDefaults.standard.removeObject(forKey: "customColor.hexList")
-                return true
-            }
 
-            let entity = StreakDataEntity()
-            entity.unlockedColors = unlockedColors
-            entity.hasNewUnlock = hasNew
-            entity.customHexList = customHexList
-            context.insert(entity)
+            if let existing = try context.fetch(descriptor).first {
+                // 기존 SwiftData 데이터와 UserDefaults 데이터 merge
+                existing.unlockedColors = Array(Set(existing.unlockedColors + unlockedColors))
+                existing.customHexList = Array(Set(existing.customHexList + customHexList))
+                existing.hasNewUnlock = existing.hasNewUnlock || hasNew
+            } else {
+                let entity = StreakDataEntity()
+                entity.unlockedColors = unlockedColors
+                entity.hasNewUnlock = hasNew
+                entity.customHexList = customHexList
+                context.insert(entity)
+            }
 
             try context.save()
             UserDefaults.standard.removeObject(forKey: "unlockedColors")

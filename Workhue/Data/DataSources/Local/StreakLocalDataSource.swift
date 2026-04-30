@@ -30,10 +30,10 @@ struct StreakLocalDataSource {
     }
 
     // MARK: - 해금 색상
-    func saveUnlockedColors(_ colors: [WorkColor]) {
-        guard let entity = try? fetchOrCreate() else { return }
+    func saveUnlockedColors(_ colors: [WorkColor]) throws {
+        let entity = try fetchOrCreate()
         entity.unlockedColors = colors.map { $0.rawValue }
-        try? context.save()
+        try context.save()
     }
 
     func loadUnlockedColors() -> [WorkColor] {
@@ -42,10 +42,10 @@ struct StreakLocalDataSource {
     }
 
     // MARK: - new! 뱃지
-    func setHasNew(_ value: Bool) {
-        guard let entity = try? fetchOrCreate() else { return }
+    func setHasNew(_ value: Bool) throws {
+        let entity = try fetchOrCreate()
         entity.hasNewUnlock = value
-        try? context.save()
+        try context.save()
     }
 
     func hasNewUnlock() -> Bool {
@@ -53,22 +53,22 @@ struct StreakLocalDataSource {
     }
 
     // MARK: - 커스텀 hex 리스트
-    func saveCustomHexList(_ hexList: [String]) {
-        guard let entity = try? fetchOrCreate() else { return }
+    func saveCustomHexList(_ hexList: [String]) throws {
+        let entity = try fetchOrCreate()
         entity.customHexList = hexList
-        try? context.save()
+        try context.save()
     }
 
     func loadCustomHexList() -> [String] {
         (try? fetchOrCreate())?.customHexList ?? []
     }
 
-    func addCustomHex(_ hex: String) {
-        guard let entity = try? fetchOrCreate() else { return }
+    func addCustomHex(_ hex: String) throws {
+        let entity = try fetchOrCreate()
         let upper = hex.uppercased()
         if !entity.customHexList.contains(upper) {
             entity.customHexList.append(upper)
-            try? context.save()
+            try context.save()
         }
     }
 }
