@@ -18,6 +18,7 @@ final class CheckOutReviewViewModel: ObservableObject {
 
     private let workModel: DayWorkModel
     private let saveUseCase: SaveDayWorkUseCase
+    private let getUseCase: GetDayWorkUseCase
     private let openAI = OpenAIManager.shared
 
     init(workModel: DayWorkModel) {
@@ -25,6 +26,7 @@ final class CheckOutReviewViewModel: ObservableObject {
         self.remembrance = workModel.remembrance ?? ""
         let repo = DayWorkRepositoryImpl()
         self.saveUseCase = SaveDayWorkUseCase(repository: repo)
+        self.getUseCase = GetDayWorkUseCase(repository: repo)
     }
 
     // MARK: - 회고 분석
@@ -63,11 +65,36 @@ final class CheckOutReviewViewModel: ObservableObject {
             )
             do {
                 try await saveUseCase.execute(updated)
+                await checkStreak()
                 NavigationRouter.shared.popToRoot()
             } catch {
                 print("퇴근 저장 실패: \(error)")
             }
             isLoading = false
+        }
+    }
+
+    // MARK: - 스트릭 체크
+    private func checkStreak() async {
+        let records = (try? await getUseCase.executeAll()) ?? []
+
+        let streakResult = CheckStreakUseCase().execute(
+            records: records,
+            isSubscriber: SubscriptionManager.shared.isSubscribed
+        )
+
+        let dataSource = StreakLocalDataSource()
+        let alreadyUnlocked = dataSource.loadUnlockedColors()
+        let newColors = UnlockColorUseCase().execute(
+            result: streakResult,
+            isSubscriber: SubscriptionManager.shared.isSubscribed,
+            alreadyUnlocked: alreadyUnlocked
+        )
+
+        if !newColors.isEmpty {
+            dataSource.saveUnlockedColors(alreadyUnlocked + newColors)
+            dataSource.setHasNew(true)
+            // TODO: StreakRewardView 팝업 트리거
         }
     }
 }

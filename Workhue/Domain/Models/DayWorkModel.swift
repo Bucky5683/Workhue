@@ -16,6 +16,7 @@ struct DayWorkModel: Hashable, Sendable {
     let startTime: Date?
     let endTime: Date?
     var workColor: WorkColor? = nil
+    var customHex: String? = nil
     
     var remembrance: String?
     var checkList: [WorkCheckList] = []

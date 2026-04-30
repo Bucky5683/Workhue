@@ -102,7 +102,7 @@ struct CheckOutReviewView: View {
 
                                 // 색상 변경 버튼
                                 Button {
-                                    NavigationRouter.shared.push(.colorPicker)
+                                    NavigationRouter.shared.push(.colorPicker(color))
                                 } label: {
                                     Text("색상 변경")
                                         .font(.system(size: FontSize.md))

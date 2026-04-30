@@ -14,6 +14,27 @@ final class HomeViewModel: ObservableObject {
     @Published var allWorks: [DayWorkModel] = []
     @Published var currentStatus: WorkStatus = .beforeWorking
     @Published var isLoading: Bool = false
+    
+    // HomeViewModel
+    var statusDescription: String {
+        guard let work = todayWork else {
+            return "아직 출근 전이에요"
+        }
+        let isPast = !Calendar.current.isDateInToday(work.date)
+        switch currentStatus {
+        case .beforeWorking:
+            return isPast ? "출근 기록이 없어요 :(" : "아직 출근 전이에요"
+        case .working:
+            return isPast ? "퇴근 시간 설정해 주세요!" : "업무 중입니다 :)"
+        case .afterWorking:
+            // 근무 시간 계산
+            guard let start = work.startTime, let end = work.endTime else { return "수고했어요!" }
+            let interval = end.timeIntervalSince(start)
+            let hours = Int(interval) / 3600
+            let minutes = (Int(interval) % 3600) / 60
+            return "\(hours)시간 \(minutes)분 일했어요. 수고했어요!"
+        }
+    }
 
     private let getUseCase: GetDayWorkUseCase
     private let saveUseCase: SaveDayWorkUseCase

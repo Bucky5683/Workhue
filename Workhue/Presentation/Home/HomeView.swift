@@ -29,7 +29,7 @@ struct HomeView: View {
             HStack(spacing: 10) {
                 Text(viewModel.currentStatus.icon)
                     .font(.system(size: FontSize.md))
-                Text(viewModel.currentStatus.description)
+                Text(viewModel.statusDescription)
                     .foregroundStyle(.gray)
                     .font(.system(size: FontSize.md))
                 Spacer()

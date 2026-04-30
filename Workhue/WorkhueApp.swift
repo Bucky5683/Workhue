@@ -34,10 +34,10 @@ struct ContentView: View {
                         CheckOutView(workModel: model)
                     case .checkOutReview(let model):
                         CheckOutReviewView(workModel: model)
+                    case .colorPicker(let aiColor):
+                        ColorPickerView(aiColor: aiColor)
                     case .settings:
                         SettingView()
-                    default:
-                        HomeView()
                     }
                 }
                 .sheet(

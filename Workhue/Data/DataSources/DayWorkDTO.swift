@@ -16,7 +16,8 @@ struct DayWorkDTO: Codable {
     let endTime: Date?
     var remembrance: String?
     var checkList: [WorkCheckListDTO]
-    var workColor: String?  // ← 추가
+    var workColor: String?
+    var customHex: String?
 }
 
 struct WorkCheckListDTO: Codable {
@@ -45,7 +46,8 @@ extension DayWorkDTO {
         self.endTime = model.endTime
         self.remembrance = model.remembrance
         self.checkList = model.checkList.map { WorkCheckListDTO(from: $0) }
-        self.workColor = model.workColor?.rawValue  // ← 추가
+        self.workColor = model.workColor?.rawValue
+        self.customHex = model.customHex
     }
 }
 
@@ -64,7 +66,8 @@ extension DayWorkDTO {
         self.startTime = record["startTime"] as? Date
         self.endTime = record["endTime"] as? Date
         self.remembrance = record["remembrance"] as? String
-        self.workColor = record["workColor"] as? String  // ← 추가
+        self.workColor = record["workColor"] as? String
+        self.customHex = record["customHex"] as? String
 
         if let str = record["checkList"] as? String,
            let data = str.data(using: .utf8),
@@ -82,7 +85,8 @@ extension DayWorkDTO {
         record["startTime"] = startTime
         record["endTime"] = endTime
         record["remembrance"] = remembrance
-        record["workColor"] = workColor  // ← 추가
+        record["workColor"] = workColor
+        record["customHex"] = customHex  // 추가
 
         if let data = try? JSONEncoder().encode(checkList),
            let str = String(data: data, encoding: .utf8) {
@@ -102,8 +106,9 @@ extension DayWorkDTO {
             startTime: startTime,
             endTime: endTime,
             workColor: workColor.flatMap { WorkColor(rawValue: $0) },
+            customHex: customHex,
             remembrance: remembrance,
-            checkList: checkList.map { $0.toModel() }  // ← 추가
+            checkList: checkList.map { $0.toModel() }
         )
     }
 }

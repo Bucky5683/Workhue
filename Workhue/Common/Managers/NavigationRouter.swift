@@ -6,7 +6,7 @@ enum Route: Hashable {
     case checkIn
     case checkOut(DayWorkModel)        // ← 추가
     case checkOutReview(DayWorkModel)  // ← 추가
-    case colorPicker
+    case colorPicker(WorkColor)
     case settings
 }
 
