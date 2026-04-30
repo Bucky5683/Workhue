@@ -38,6 +38,8 @@ struct ContentView: View {
                         ColorPickerView(aiColor: aiColor)
                     case .settings:
                         SettingView()
+                    case .unlockedColors:
+                        UnlockedColorsView()
                     }
                 }
                 .sheet(

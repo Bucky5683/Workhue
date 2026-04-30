@@ -8,6 +8,7 @@ enum Route: Hashable {
     case checkOutReview(DayWorkModel)  // ← 추가
     case colorPicker(WorkColor)
     case settings
+    case unlockedColors
 }
 
 enum PresentationStyle {

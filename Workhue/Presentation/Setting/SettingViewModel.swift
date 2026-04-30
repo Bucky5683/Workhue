@@ -19,6 +19,7 @@ final class SettingViewModel: ObservableObject {
     @Published var totalNotiOn: Bool = false
     @Published var gettingWorkNotiOn: Bool = false
     @Published var endWorkNotiOn: Bool = false
+    @Published var hasNewUnlock: Bool = false
     @Published var gettingWorkTime: Date = Calendar.current.date(
         bySettingHour: 9, minute: 0, second: 0, of: Date()
     ) ?? Date()
@@ -30,15 +31,16 @@ final class SettingViewModel: ObservableObject {
     // MARK: - Manager
     private let subscriptionManager = SubscriptionManager.shared
     private let notificationManager = NotificationManager.shared
+    private let streakRepo = StreakRepositoryImpl()
     private let defaults = UserDefaults.standard
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - UserDefaults Keys
-    private let totalNotiKey        = "totalNotiOn"
-    private let gettingWorkNotiKey  = "gettingWorkNotiOn"
-    private let endWorkNotiKey      = "endWorkNotiOn"
-    private let gettingWorkTimeKey  = "gettingWorkTime"
-    private let endWorkTimeKey      = "endWorkTime"
+    private let totalNotiKey       = "totalNotiOn"
+    private let gettingWorkNotiKey = "gettingWorkNotiOn"
+    private let endWorkNotiKey     = "endWorkNotiOn"
+    private let gettingWorkTimeKey = "gettingWorkTime"
+    private let endWorkTimeKey     = "endWorkTime"
 
     // MARK: - iCloud 연동 (SubscriptionManager 단일 소스)
     var isICloudEnabled: Bool {
@@ -73,11 +75,16 @@ final class SettingViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] value in
                 self?.isSubscribed = value
-                if !value {
-                    self?.setICloud(false)
-                }
+                if !value { self?.setICloud(false) }
             }
             .store(in: &cancellables)
+    }
+
+    // MARK: - new! 뱃지 로드
+    func loadHasNewUnlock() {
+        Task {
+            hasNewUnlock = (try? await streakRepo.hasNewUnlock()) ?? false
+        }
     }
 
     // MARK: - iCloud 설정

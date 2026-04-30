@@ -76,7 +76,7 @@ final class CheckOutReviewViewModel: ObservableObject {
         }
     }
 
-    // MARK: - 스트릭 체크
+    // MARK: - 연속 기록 체크
     @discardableResult
     private func checkStreak() async -> Bool {
         let records = (try? await getUseCase.executeAll()) ?? []
@@ -93,16 +93,6 @@ final class CheckOutReviewViewModel: ObservableObject {
             isSubscriber: SubscriptionManager.shared.isSubscribed,
             alreadyUnlocked: alreadyUnlocked
         )
-
-        // 커스텀 색상 해금 조건 체크 (업무 + 감정 동시 3일, 구독자 전용)
-        if SubscriptionManager.shared.isSubscribed,
-           streakResult.workStreak >= 3,
-           streakResult.emotionStreak >= 3 {
-            let isUnlocked = (try? await streakRepo.isCustomColorUnlocked()) ?? false
-            if !isUnlocked {
-                try? await streakRepo.setCustomColorUnlocked(true)
-            }
-        }
 
         if !newColors.isEmpty {
             try? await streakRepo.saveUnlockedColors(alreadyUnlocked + newColors)

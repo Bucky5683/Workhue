@@ -12,8 +12,8 @@ protocol StreakRepository {
     func loadUnlockedColors() async throws -> [WorkColor]
     func setHasNew(_ value: Bool) async throws
     func hasNewUnlock() async throws -> Bool
-    func setCustomColorUnlocked(_ value: Bool) async throws
-    func isCustomColorUnlocked() async throws -> Bool
+    func saveCustomHex(_ hex: String)
+    func loadCustomHex() -> String?
 }
 
 final class StreakRepositoryImpl: StreakRepository {
@@ -56,19 +56,12 @@ final class StreakRepositoryImpl: StreakRepository {
         }
     }
 
-    func setCustomColorUnlocked(_ value: Bool) async throws {
-        if useICloud {
-            try await cloud.setCustomColorUnlocked(value)
-        } else {
-            local.setCustomColorUnlocked(value)
-        }
+    // 커스텀 hex는 구독 여부 상관없이 항상 UserDefaults
+    func saveCustomHex(_ hex: String) {
+        local.saveCustomHex(hex)
     }
 
-    func isCustomColorUnlocked() async throws -> Bool {
-        if useICloud {
-            return try await cloud.isCustomColorUnlocked()
-        } else {
-            return local.isCustomColorUnlocked()
-        }
+    func loadCustomHex() -> String? {
+        local.loadCustomHex()
     }
 }
