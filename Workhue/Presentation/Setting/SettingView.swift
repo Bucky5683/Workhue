@@ -132,7 +132,7 @@ struct SettingView: View {
 
             // 앱 테마 — 구독자 전용
             Button {
-                // AppThemeView 미구현
+                NavigationRouter.shared.push(.appTheme)
             } label: {
                 HStack(spacing: 6) {
                     Text("앱 테마")

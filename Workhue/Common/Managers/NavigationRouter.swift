@@ -9,6 +9,7 @@ enum Route: Hashable {
     case colorPicker(WorkColor)
     case settings
     case unlockedColors
+    case appTheme
 }
 
 enum PresentationStyle {
