@@ -130,7 +130,7 @@ struct SettingView: View {
             .disabled(!viewModel.totalNotiOn)
             .opacity(viewModel.totalNotiOn ? 1 : 0.3)
 
-            // 앱 테마 — 구독자 전용
+            // 앱 테마
             Button {
                 NavigationRouter.shared.push(.appTheme)
             } label: {
@@ -138,14 +138,12 @@ struct SettingView: View {
                     Text("앱 테마")
                         .font(.system(size: FontSize.xl, weight: .medium))
                         .foregroundStyle(Color.System.pointText)
-                    ProBadge()
+
                     Spacer()
                 }
             }
             .tint(Color.System.text)
             .padding(.horizontal, 10)
-            .disabled(!viewModel.isSubscribed)
-            .opacity(viewModel.isSubscribed ? 1 : 0.3)
 
             // 해금 색상
             Button {
