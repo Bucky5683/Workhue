@@ -9,15 +9,25 @@ import Foundation
 import Combine
 
 final class SubscriptionManager: ObservableObject {
-    static let shared = SubscriptionManager()
-    private init() {
-        isSubscribed = UserDefaults.standard.bool(forKey: "isSubscribed")
-    }
-
+    
+    // iCloud 토글 저장 키
+    private let iCloudEnabledKey = "setting.iCloudEnabled"
+    
     @Published private(set) var isSubscribed: Bool = false {
         didSet {
             UserDefaults.standard.set(isSubscribed, forKey: "isSubscribed")
         }
+    }
+    
+    // 실제 iCloud 사용 여부 — 두 조건 모두 충족해야 함
+    var useICloud: Bool {
+        isSubscribed && isICloudEnabled
+    }
+    
+    static let shared = SubscriptionManager()
+    
+    private init() {
+        isSubscribed = UserDefaults.standard.bool(forKey: "isSubscribed")
     }
 
     // 나중에 StoreKit 2로 교체할 메서드들
@@ -40,5 +50,10 @@ final class SubscriptionManager: ObservableObject {
     // 구독 해지 시 호출 (StoreKit 연동 시 제거)
     func cancel() {
         isSubscribed = false
+    }
+
+    var isICloudEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: iCloudEnabledKey) }
+        set { UserDefaults.standard.set(newValue, forKey: iCloudEnabledKey) }
     }
 }

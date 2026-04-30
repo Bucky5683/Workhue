@@ -76,6 +76,8 @@ final class CheckOutReviewViewModel: ObservableObject {
 
     // MARK: - 스트릭 체크
     private func checkStreak() async {
+        let repo = DayWorkRepositoryImpl()
+        let getUseCase = GetDayWorkUseCase(repository: repo)
         let records = (try? await getUseCase.executeAll()) ?? []
 
         let streakResult = CheckStreakUseCase().execute(
@@ -83,8 +85,8 @@ final class CheckOutReviewViewModel: ObservableObject {
             isSubscriber: SubscriptionManager.shared.isSubscribed
         )
 
-        let dataSource = StreakLocalDataSource()
-        let alreadyUnlocked = dataSource.loadUnlockedColors()
+        let streakRepo = StreakRepositoryImpl()
+        let alreadyUnlocked = (try? await streakRepo.loadUnlockedColors()) ?? []
         let newColors = UnlockColorUseCase().execute(
             result: streakResult,
             isSubscriber: SubscriptionManager.shared.isSubscribed,
@@ -92,8 +94,8 @@ final class CheckOutReviewViewModel: ObservableObject {
         )
 
         if !newColors.isEmpty {
-            dataSource.saveUnlockedColors(alreadyUnlocked + newColors)
-            dataSource.setHasNew(true)
+            try? await streakRepo.saveUnlockedColors(alreadyUnlocked + newColors)
+            try? await streakRepo.setHasNew(true)
             // TODO: StreakRewardView 팝업 트리거
         }
     }

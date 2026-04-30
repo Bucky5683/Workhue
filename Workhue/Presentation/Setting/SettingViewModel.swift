@@ -25,7 +25,7 @@ final class SettingViewModel: ObservableObject {
     @Published var endWorkTime: Date = Calendar.current.date(
         bySettingHour: 18, minute: 0, second: 0, of: Date()
     ) ?? Date()
-    @Published var notificationDenied: Bool = false  // 권한 거부 시 설정앱 유도
+    @Published var notificationDenied: Bool = false
 
     // MARK: - Manager
     private let subscriptionManager = SubscriptionManager.shared
@@ -34,12 +34,17 @@ final class SettingViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - UserDefaults Keys
-    private let iCloudKey = "iCloudOn"
-    private let totalNotiKey = "totalNotiOn"
-    private let gettingWorkNotiKey = "gettingWorkNotiOn"
-    private let endWorkNotiKey = "endWorkNotiOn"
-    private let gettingWorkTimeKey = "gettingWorkTime"
-    private let endWorkTimeKey = "endWorkTime"
+    private let totalNotiKey        = "totalNotiOn"
+    private let gettingWorkNotiKey  = "gettingWorkNotiOn"
+    private let endWorkNotiKey      = "endWorkNotiOn"
+    private let gettingWorkTimeKey  = "gettingWorkTime"
+    private let endWorkTimeKey      = "endWorkTime"
+
+    // MARK: - iCloud 연동 (SubscriptionManager 단일 소스)
+    var isICloudEnabled: Bool {
+        get { SubscriptionManager.shared.isICloudEnabled }
+        set { SubscriptionManager.shared.isICloudEnabled = newValue }
+    }
 
     init() {
         loadSavedSettings()
@@ -49,7 +54,7 @@ final class SettingViewModel: ObservableObject {
     // MARK: - 저장된 설정 불러오기
     private func loadSavedSettings() {
         isSubscribed = subscriptionManager.isSubscribed
-        iCloudOn = defaults.bool(forKey: iCloudKey)
+        iCloudOn = subscriptionManager.isICloudEnabled
         totalNotiOn = defaults.bool(forKey: totalNotiKey)
         gettingWorkNotiOn = defaults.bool(forKey: gettingWorkNotiKey)
         endWorkNotiOn = defaults.bool(forKey: endWorkNotiKey)
@@ -68,7 +73,6 @@ final class SettingViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] value in
                 self?.isSubscribed = value
-                // 구독 해지 시 iCloud 자동 off
                 if !value {
                     self?.setICloud(false)
                 }
@@ -79,7 +83,7 @@ final class SettingViewModel: ObservableObject {
     // MARK: - iCloud 설정
     func setICloud(_ value: Bool) {
         iCloudOn = value
-        defaults.set(value, forKey: iCloudKey)
+        subscriptionManager.isICloudEnabled = value
     }
 
     // MARK: - 알림 전체 설정
@@ -97,12 +101,9 @@ final class SettingViewModel: ObservableObject {
 
         Task { @MainActor in
             let status = await notificationManager.checkAuthorizationStatus()
-            print("현재 권한 상태: \(status.rawValue)")
-
             switch status {
             case .notDetermined:
                 let granted = await notificationManager.requestAuthorization()
-                print("권한 요청 결과: \(granted)")
                 if granted {
                     totalNotiOn = true
                     defaults.set(true, forKey: totalNotiKey)
@@ -114,7 +115,6 @@ final class SettingViewModel: ObservableObject {
                 totalNotiOn = true
                 defaults.set(true, forKey: totalNotiKey)
             case .denied:
-                print("권한 거부됨")
                 totalNotiOn = false
                 showNotificationDeniedAlert()
             @unknown default:

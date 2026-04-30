@@ -27,11 +27,11 @@ struct UnlockColorUseCase {
                 }
             }
             if result.workStreak >= 3 && result.emotionStreak >= 3 {
-                if result.workStreak >= 3 && result.emotionStreak >= 3 {
-                    // 기능 해금 (한 번만)
-                    let dataSource = StreakLocalDataSource()
-                    if !dataSource.isCustomColorUnlocked() {
-                        dataSource.setCustomColorUnlocked(true)
+                Task {
+                    let streakRepo = StreakRepositoryImpl()
+                    if let isUnlocked = try? await streakRepo.isCustomColorUnlocked(),
+                       !isUnlocked {
+                        try? await streakRepo.setCustomColorUnlocked(true)
                     }
                 }
             }
