@@ -21,7 +21,7 @@ final class CheckOutReviewViewModel: ObservableObject {
     private let saveUseCase: SaveDayWorkUseCase
     private let getUseCase: GetDayWorkUseCase
     private let streakRepo: StreakRepositoryImpl
-    private let openAI = OpenAIManager.shared
+    private let apiClient: WorkhueAPIClientProtocol
 
     init(workModel: DayWorkModel) {
         self.workModel = workModel
@@ -31,6 +31,7 @@ final class CheckOutReviewViewModel: ObservableObject {
         self.saveUseCase = SaveDayWorkUseCase(repository: repo)
         self.getUseCase = GetDayWorkUseCase(repository: repo)
         self.streakRepo = StreakRepositoryImpl(context: context)
+        self.apiClient = WorkhueAPIClient()
     }
 
     func analyzeRemembrance() {
@@ -38,7 +39,8 @@ final class CheckOutReviewViewModel: ObservableObject {
         Task {
             isAnalyzing = true
             do {
-                analyzedColor = try await openAI.analyzeEmotion(from: remembrance)
+                let rawValue = try await apiClient.analyzeEmotion(remembrance: remembrance)
+                analyzedColor = WorkColor(rawValue: rawValue) ?? .steelBlue
             } catch {
                 print("분석 실패: \(error)")
                 analyzedColor = .steelBlue
@@ -46,7 +48,7 @@ final class CheckOutReviewViewModel: ObservableObject {
             isAnalyzing = false
         }
     }
-
+    
     func changeColor(_ color: WorkColor) {
         analyzedColor = color
     }
