@@ -27,6 +27,28 @@ enum WorkColor: String, CaseIterable, Hashable, Codable {
     case hologramOcean   = "HologramOcean"
     case hologramSunset  = "HologramSunset"
     case custom          = "Custom"  // 추가
+    
+    enum ColorCategory {
+        case basic, unlocked, subscriber
+    }
+
+    var category: ColorCategory {
+        switch self {
+        case .sunshineYellow, .skyBlue, .mintGreen,
+             .coralRed, .lavender, .steelBlue:
+            return .basic
+
+        case .gold, .roseGold, .forestGreen, .sunsetOrange,
+             .pink, .mint, .lilac, .peach, .silver:
+            return .unlocked
+
+        case .hologramPink, .hologramOcean, .hologramSunset:
+            return .subscriber
+
+        case .custom:
+            return .basic  // 커스텀은 그리드에 안 보여주니까 아무거나 OK
+        }
+    }
 
     var color: Color {
         switch self {

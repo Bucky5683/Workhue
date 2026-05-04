@@ -14,6 +14,7 @@ final class CheckOutReviewViewModel: ObservableObject {
 
     @Published var remembrance: String = ""
     @Published var analyzedColor: WorkColor? = nil
+    @Published var selectedCustomHex: String? = nil
     @Published var isAnalyzing: Bool = false
     @Published var isLoading: Bool = false
 
@@ -26,6 +27,9 @@ final class CheckOutReviewViewModel: ObservableObject {
     init(workModel: DayWorkModel) {
         self.workModel = workModel
         self.remembrance = workModel.remembrance ?? ""
+        self.analyzedColor = workModel.workColor
+        self.selectedCustomHex = workModel.customHex
+
         let context = SwiftDataManager.shared.context
         let repo = DayWorkRepositoryImpl(context: context)
         self.saveUseCase = SaveDayWorkUseCase(repository: repo)
@@ -36,26 +40,39 @@ final class CheckOutReviewViewModel: ObservableObject {
 
     func analyzeRemembrance() {
         guard !remembrance.isEmpty else { return }
+
         Task {
             isAnalyzing = true
+
             do {
                 let rawValue = try await apiClient.analyzeEmotion(remembrance: remembrance)
                 analyzedColor = WorkColor(rawValue: rawValue) ?? .steelBlue
+                selectedCustomHex = nil
             } catch {
                 print("분석 실패: \(error)")
                 analyzedColor = .steelBlue
+                selectedCustomHex = nil
             }
+
             isAnalyzing = false
         }
     }
     
-    func changeColor(_ color: WorkColor) {
+    func changeColor(_ color: WorkColor, customHex: String? = nil) {
         analyzedColor = color
+        selectedCustomHex = color == .custom ? customHex : nil
+
+        if let customHex {
+            Task {
+                try? await streakRepo.addCustomHex(customHex)
+            }
+        }
     }
 
     func checkOut() {
         Task {
             isLoading = true
+
             let updated = DayWorkModel(
                 id: workModel.id,
                 date: workModel.date,
@@ -63,18 +80,23 @@ final class CheckOutReviewViewModel: ObservableObject {
                 startTime: workModel.startTime,
                 endTime: workModel.endTime,
                 workColor: analyzedColor,
+                customHex: selectedCustomHex,
                 remembrance: remembrance,
                 checkList: workModel.checkList
             )
+
             do {
                 try await saveUseCase.execute(updated)
+
                 let hasReward = await checkStreak()
+
                 if !hasReward {
                     NavigationRouter.shared.popToRoot()
                 }
             } catch {
                 print("퇴근 저장 실패: \(error)")
             }
+
             isLoading = false
         }
     }
@@ -89,6 +111,7 @@ final class CheckOutReviewViewModel: ObservableObject {
         )
 
         let alreadyUnlocked = (try? await streakRepo.loadUnlockedColors()) ?? []
+
         let newColors = UnlockColorUseCase().execute(
             result: streakResult,
             isSubscriber: SubscriptionManager.shared.isSubscribed,
@@ -98,6 +121,7 @@ final class CheckOutReviewViewModel: ObservableObject {
         if !newColors.isEmpty {
             try? await streakRepo.saveUnlockedColors(alreadyUnlocked + newColors)
             try? await streakRepo.setHasNew(true)
+
             NavigationRouter.shared.present(
                 StreakRewardView(
                     unlockedColors: newColors,
@@ -108,8 +132,10 @@ final class CheckOutReviewViewModel: ObservableObject {
                 ),
                 style: .overFullScreen
             )
+
             return true
         }
+
         return false
     }
 }

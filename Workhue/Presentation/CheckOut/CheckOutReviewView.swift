@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CheckOutReviewView: View {
     @StateObject private var viewModel: CheckOutReviewViewModel
-
+    
     init(workModel: DayWorkModel) {
         _viewModel = StateObject(wrappedValue: CheckOutReviewViewModel(workModel: workModel))
     }
@@ -102,7 +102,12 @@ struct CheckOutReviewView: View {
 
                                 // 색상 변경 버튼
                                 Button {
-                                    NavigationRouter.shared.push(.colorPicker(color))
+                                    NavigationRouter.shared.presentColorPicker(
+                                        aiColor: color,
+                                        onConfirm: { [weak viewModel] selectedColor, customHex in
+                                            viewModel?.changeColor(selectedColor, customHex: customHex)
+                                        }
+                                    )
                                 } label: {
                                     Text("색상 변경")
                                         .font(.system(size: FontSize.md))

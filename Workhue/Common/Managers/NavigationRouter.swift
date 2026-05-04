@@ -1,12 +1,12 @@
 import SwiftUI
 import Combine
+import ComposableArchitecture
 
 enum Route: Hashable {
     case dayDetail(DayWorkModel)
     case checkIn
     case checkOut(DayWorkModel)        // ← 추가
     case checkOutReview(DayWorkModel)  // ← 추가
-    case colorPicker(WorkColor)
     case settings
     case unlockedColors
     case appTheme
@@ -20,6 +20,7 @@ enum PresentationStyle {
     case overFullScreen
 }
 
+@MainActor
 final class NavigationRouter: ObservableObject {
     static let shared = NavigationRouter()
     private init() {}
@@ -28,6 +29,8 @@ final class NavigationRouter: ObservableObject {
     @Published var presentationStyle: PresentationStyle = .fullScreen
     @Published var path: [Route] = []
 
+    private var colorPickerCompletion: ((WorkColor, String?) -> Void)?
+    
     func push(_ route: Route) {
         path.append(route)
     }
@@ -61,4 +64,32 @@ final class NavigationRouter: ObservableObject {
     func popToRoot() {
         path.removeAll()
     }
+    
+    func presentColorPicker(
+            aiColor: WorkColor,
+            onConfirm: @escaping (WorkColor, String?) -> Void
+        ) {
+            colorPickerCompletion = onConfirm
+
+            present(
+                ColorPickerView(
+                    store: Store(
+                        initialState: ColorPickerFeature.State(
+                            aiColor: aiColor,
+                            selectedColor: aiColor
+                        )
+                    ) {
+                        ColorPickerFeature()
+                    },
+                    onConfirm: { [weak self] selectedColor, customHex in
+                        self?.colorPickerCompletion?(selectedColor, customHex)
+                        self?.dismiss()
+                    },
+                    onCancel: { [weak self] in
+                        self?.dismiss()
+                    }
+                ),
+                style: .fullScreen
+            )
+        }
 }

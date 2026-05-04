@@ -48,9 +48,6 @@ struct ContentView: View {
                     case .checkOutReview(let model):
                         CheckOutReviewView(workModel: model)
 
-                    case .colorPicker(let aiColor):
-                        ColorPickerView(aiColor: aiColor)
-
                     case .settings:
                         SettingView()
 
