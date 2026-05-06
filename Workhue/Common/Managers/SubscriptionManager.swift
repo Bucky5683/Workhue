@@ -98,12 +98,12 @@ final class SubscriptionManager: ObservableObject {
     }
 
     // MARK: - Transaction.updates listener
-    func listenForTransactions() -> Task<Void, Never> {
-        Task {
+    func listenForTransactions() -> Task<Void, Error> {
+        Task.detached {
             for await result in Transaction.updates {
                 do {
-                    let transaction = try checkVerified(result)
-                    await updateSubscriptionStatus()
+                    let transaction = try await self.checkVerified(result)
+                    await self.updateSubscriptionStatus()
                     await transaction.finish()
                 } catch {
                     print("Transaction 검증 실패: \(error)")

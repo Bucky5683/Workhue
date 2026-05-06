@@ -22,7 +22,7 @@ final class SubscriptionViewModel: ObservableObject {
         guard let product = manager.products.first(where: {
             $0.id == SubscriptionManager.monthlyID
         }) else {
-            showAlert(message: "상품 정보를 불러올 수 없어요.")
+            showError("상품 정보를 불러올 수 없어요.")
             return
         }
         purchase(product)
@@ -32,7 +32,7 @@ final class SubscriptionViewModel: ObservableObject {
         guard let product = manager.products.first(where: {
             $0.id == SubscriptionManager.yearlyID
         }) else {
-            showAlert(message: "상품 정보를 불러올 수 없어요.")
+            showError("상품 정보를 불러올 수 없어요.")
             return
         }
         purchase(product)
@@ -73,14 +73,23 @@ final class SubscriptionViewModel: ObservableObject {
         }
     }
 
-    // showError 삭제하고 이걸로 교체
-    private func showAlert(title: String = "안내", message: String) {
+    private func showError(_ message: String) {
+        NavigationRouter.shared.showAlert(
+            AlertModel(
+                title: "안내",
+                message: message,
+                confirmTitle: "확인",
+                cancelTitle: ""
+            )
+        )
+    }
+    
+    private func showAlert(title: String, message: String) {
         NavigationRouter.shared.showAlert(
             AlertModel(
                 title: title,
                 message: message,
-                confirmTitle: "확인",
-                cancelTitle: ""
+                confirmTitle: "확인", cancelTitle: ""
             )
         )
     }

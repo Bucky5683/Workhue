@@ -14,7 +14,7 @@ struct WorkhueApp: App {
     @StateObject private var appThemeStore = AppThemeStore.shared
 
     // listener Task 유지용
-    private let updateListenerTask: Task<Void, Never>
+    private let updateListenerTask: Task<Void, Error>
     
     init() {
         // UserDefaults → SwiftData 단 1회 마이그레이션
