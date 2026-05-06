@@ -83,7 +83,11 @@ struct CheckOutReviewView: View {
 
                                 HStack(spacing: 16) {
                                     Circle()
-                                        .fill(color.color)
+                                        .fill(
+                                            color == .custom
+                                                ? Color(hex: viewModel.selectedCustomHex ?? "D9D9D9")
+                                                : color.color
+                                        )
                                         .frame(width: 56, height: 56)
 
                                     VStack(alignment: .leading, spacing: 4) {

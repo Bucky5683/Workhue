@@ -55,49 +55,37 @@ struct ColorPickerView: View {
     // aiColor는 고정 표시, selectedColor가 다를 때만 "선택한 색상" 섹션 추가 노출
     private var selectedColorSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // AI 추천 색상 (고정)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("오늘의 추천 색상")
-                    .font(.system(size: FontSize.lg, weight: .semibold))
-                    .foregroundStyle(Color.System.text)
-
-                HStack(spacing: 16) {
-                    // 색상 원 표시 부분
-                    Circle()
-                        .fill(customColor(for: store.selectedColor, hex: store.selectedCustomHex))
-                        .frame(width: 56, height: 56)
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(store.aiColor.title)
-                            .font(.system(size: FontSize.md, weight: .semibold))
-                            .foregroundStyle(Color.System.text)
-                        Text(store.aiColor.description)
-                            .font(.system(size: FontSize.sm))
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                }
-                .padding(16)
-                .background(Color.System.sub.opacity(0.3))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-
-            // 현재 선택 색상 (변경 가능)
-            if store.selectedColor != store.aiColor {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("선택한 색상")
-                        .font(.system(size: FontSize.sm, weight: .medium))
+            // AI 추천 색상 카드: 원도 텍스트도 aiColor 고정
+            HStack(spacing: 16) {
+                Circle()
+                    .fill(store.aiColor.color)  // ← aiColor 고정
+                    .frame(width: 56, height: 56)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(store.aiColor.title)
+                        .font(.system(size: FontSize.md, weight: .semibold))
+                        .foregroundStyle(Color.System.text)
+                    Text(store.aiColor.description)
+                        .font(.system(size: FontSize.sm))
                         .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+            .padding(16)
+            .background(Color.System.sub.opacity(0.3))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                    HStack(spacing: 12) {
-                        Circle()
-                            .fill(store.selectedColor.color)
-                            .frame(width: 32, height: 32)
-                        Text(store.selectedColor.title)
-                            .font(.system(size: FontSize.md))
-                            .foregroundStyle(Color.System.text)
-                        Spacer()
-                    }
+            // 선택한 색상 섹션: 헬퍼로 실제 Hex 색 표시
+            if store.selectedColor != store.aiColor || store.selectedCustomHex != nil {
+                HStack(spacing: 12) {
+                    Circle()
+                        .fill(customColor(for: store.selectedColor, hex: store.selectedCustomHex))  // ← 헬퍼
+                        .frame(width: 32, height: 32)
+                    Text(store.selectedColor == .custom
+                         ? (store.selectedCustomHex ?? store.selectedColor.title)
+                         : store.selectedColor.title)
+                        .font(.system(size: FontSize.md))
+                        .foregroundStyle(Color.System.text)
+                    Spacer()
                 }
             }
         }
