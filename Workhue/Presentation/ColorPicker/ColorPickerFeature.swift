@@ -24,6 +24,7 @@ struct ColorPickerFeature {
         var isSubscriber: Bool = false
         var isLoading: Bool = false
         var alertMessage: String?
+        var dailyFreeUsed: Bool = false  // 오늘 무료 1회 사용 여부
     }
 
     enum Action: Equatable {
@@ -34,7 +35,17 @@ struct ColorPickerFeature {
         case hexTextChanged(String)
         case customHexConfirmTapped
 
+        case adWatchRequested(AdTrigger)   // 추가
+        case adWatchCompleted(AdTrigger)   // 추가
+        case adFailed                      // 추가
+
         case alertDismissed
+    }
+
+    // 광고 트리거 구분용
+    enum AdTrigger: Equatable {
+        case colorChange(WorkColor)
+        case customHex(String)
     }
 
     var body: some Reducer<State, Action> {
@@ -42,6 +53,7 @@ struct ColorPickerFeature {
             switch action {
             case .onAppear:
                 state.isLoading = true   // ← 추가
+                state.dailyFreeUsed = DailyFreeUsageManager.hasUsedToday()
                 return .run { send in
                     let result = await MainActor.run {
                         let context = SwiftDataManager.shared.context
@@ -76,9 +88,17 @@ struct ColorPickerFeature {
                     return .none
                 }
 
-                state.selectedColor = color
-                state.selectedCustomHex = nil
-                return .none
+                // 구독자 + 오늘 무료 미사용: 바로 선택
+                if state.isSubscriber && !state.dailyFreeUsed {
+                    state.selectedColor = color
+                    state.selectedCustomHex = nil
+                    state.dailyFreeUsed = true
+                    DailyFreeUsageManager.markUsedToday()
+                    return .none
+                }
+
+                // 무료 사용자 or 구독자 1회 초과: 광고 시청
+                return .send(.adWatchRequested(.colorChange(color)))
 
             case let .hexTextChanged(text):
                 state.hexText = text.uppercased()
@@ -90,12 +110,50 @@ struct ColorPickerFeature {
                     state.alertMessage = "올바른 Hex 색상을 입력해주세요."
                     return .none
                 }
-                state.selectedColor = .custom
-                state.selectedCustomHex = normalizedHex
-                // 저장은 CheckOutReviewViewModel에서만 함
-                return .none
+
+                // 구독자 + 오늘 무료 미사용: 바로 적용
+                if state.isSubscriber && !state.dailyFreeUsed {
+                    state.selectedColor = .custom
+                    state.selectedCustomHex = normalizedHex
+                    state.dailyFreeUsed = true
+                    DailyFreeUsageManager.markUsedToday()
+                    return .none
+                }
+
+                // 무료 사용자 or 구독자 1회 초과: 광고 시청
+                return .send(.adWatchRequested(.customHex(normalizedHex)))
+                
             case .alertDismissed:
                 state.alertMessage = nil
+                return .none
+                
+            case let .adWatchRequested(trigger):
+                guard RewardedAdManager.shared.isAdReady else {
+                    state.alertMessage = "광고를 불러오는 중이에요. 잠시 후 다시 시도해주세요."
+                    return .none
+                }
+                return .run { send in
+                    let success = await RewardedAdManager.shared.showAd()
+                    if success {
+                        await send(.adWatchCompleted(trigger))
+                    } else {
+                        await send(.adFailed)
+                    }
+                }
+
+            case let .adWatchCompleted(trigger):
+                switch trigger {
+                case let .colorChange(color):
+                    state.selectedColor = color
+                    state.selectedCustomHex = nil
+                case let .customHex(hex):
+                    state.selectedColor = .custom
+                    state.selectedCustomHex = hex
+                }
+                return .none
+
+            case .adFailed:
+                state.alertMessage = "광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요."
                 return .none
             }
         }

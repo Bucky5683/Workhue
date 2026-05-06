@@ -147,28 +147,31 @@ struct ColorPickerView: View {
                                 Circle()
                                     .fill(color.color)
                                     .frame(width: 44, height: 44)
-
                                 if store.selectedColor == color {
                                     Image(systemName: "checkmark")
                                         .font(.system(size: 16, weight: .bold))
                                         .foregroundStyle(.white)
                                 }
-
                                 if !isColorUnlocked(color) {
                                     Circle()
                                         .fill(.black.opacity(0.45))
                                         .frame(width: 44, height: 44)
-
                                     Image(systemName: "lock.fill")
                                         .font(.system(size: 14))
                                         .foregroundStyle(.white)
                                 }
                             }
-
-                            Text(color.title)
-                                .font(.system(size: FontSize.xs))
-                                .foregroundStyle(Color.System.text)
-                                .lineLimit(1)
+                            HStack(spacing: 2) {
+                                if (!store.isSubscriber || store.dailyFreeUsed) && isColorUnlocked(color) {
+                                    Image(systemName: "play.rectangle.fill")
+                                        .font(.system(size: 8))
+                                        .foregroundStyle(.secondary)
+                                }
+                                Text(color.title)
+                                    .font(.system(size: FontSize.xs))
+                                    .foregroundStyle(Color.System.text)
+                                    .lineLimit(1)
+                            }
                         }
                     }
                 }
@@ -193,15 +196,23 @@ struct ColorPickerView: View {
                 .background(Color.System.sub.opacity(0.3))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                Button("적용") {
+                Button {
                     store.send(.customHexConfirmTapped)
+                } label: {
+                    HStack(spacing: 4) {
+                        if !store.isSubscriber {
+                            Image(systemName: "play.rectangle.fill")
+                                .font(.system(size: 12))
+                        }
+                        Text("적용")
+                            .font(.system(size: FontSize.md, weight: .semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color.System.main)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                .font(.system(size: FontSize.md, weight: .semibold))
-                .foregroundStyle(.white)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(Color.System.main)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
     }

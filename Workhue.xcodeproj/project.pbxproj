@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EB70ABA52FAB315700E1274A /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = EB70ABA42FAB315700E1274A /* GoogleMobileAds */; };
 		EB7E0F4D2F9C88220070D45F /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = EB7E0F4C2F9C88220070D45F /* ComposableArchitecture */; };
 		EB7E0F502F9C88790070D45F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = EB7E0F4F2F9C88790070D45F /* FirebaseAnalytics */; };
 		EB7E0F522F9C88790070D45F /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = EB7E0F512F9C88790070D45F /* FirebaseCrashlytics */; };
@@ -16,9 +17,22 @@
 		EB7E0F372F9C876B0070D45F /* Workhue.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Workhue.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		EB70ABA72FAB33DD00E1274A /* Exceptions for "Workhue" folder in "Workhue" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EB7E0F362F9C876B0070D45F /* Workhue */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		EB7E0F392F9C876B0070D45F /* Workhue */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EB70ABA72FAB33DD00E1274A /* Exceptions for "Workhue" folder in "Workhue" target */,
+			);
 			path = Workhue;
 			sourceTree = "<group>";
 		};
@@ -29,6 +43,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EB70ABA52FAB315700E1274A /* GoogleMobileAds in Frameworks */,
 				EB7E0F522F9C88790070D45F /* FirebaseCrashlytics in Frameworks */,
 				EB7E0F502F9C88790070D45F /* FirebaseAnalytics in Frameworks */,
 				EB7E0F4D2F9C88220070D45F /* ComposableArchitecture in Frameworks */,
@@ -77,6 +92,7 @@
 				EB7E0F4C2F9C88220070D45F /* ComposableArchitecture */,
 				EB7E0F4F2F9C88790070D45F /* FirebaseAnalytics */,
 				EB7E0F512F9C88790070D45F /* FirebaseCrashlytics */,
+				EB70ABA42FAB315700E1274A /* GoogleMobileAds */,
 			);
 			productName = Workhue;
 			productReference = EB7E0F372F9C876B0070D45F /* Workhue.app */;
@@ -109,6 +125,7 @@
 			packageReferences = (
 				EB7E0F4B2F9C88220070D45F /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
 				EB7E0F4E2F9C88790070D45F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				EB70ABA32FAB315700E1274A /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EB7E0F382F9C876B0070D45F /* Products */;
@@ -271,6 +288,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Workhue/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -317,6 +335,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Workhue/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -373,6 +392,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		EB70ABA32FAB315700E1274A /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 13.3.0;
+			};
+		};
 		EB7E0F4B2F9C88220070D45F /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
@@ -394,6 +421,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		EB70ABA42FAB315700E1274A /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EB70ABA32FAB315700E1274A /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
 		EB7E0F4C2F9C88220070D45F /* ComposableArchitecture */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EB7E0F4B2F9C88220070D45F /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;

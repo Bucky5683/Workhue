@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import GoogleMobileAds
 
 @main
 struct WorkhueApp: App {
@@ -19,6 +20,7 @@ struct WorkhueApp: App {
     init() {
         // UserDefaults → SwiftData 단 1회 마이그레이션
         MigrationManager.migrateIfNeeded()
+        MobileAds.shared.start(completionHandler: nil)
         // 앱 시작 직후 listener 등록 (외부 결제/다른 기기 결제 놓치지 않으려면 여기서)
         updateListenerTask = SubscriptionManager.shared.listenForTransactions()
     }
@@ -33,6 +35,7 @@ struct WorkhueApp: App {
                     // 상품 로드 + 구독 상태 복원
                     await SubscriptionManager.shared.loadProducts()
                     await SubscriptionManager.shared.updateSubscriptionStatus()
+                    RewardedAdManager.shared.loadAd()  // 추가
                 }
         }
     }
