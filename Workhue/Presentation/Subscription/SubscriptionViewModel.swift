@@ -6,38 +6,69 @@
 //
 
 import Foundation
+import StoreKit
 import Combine
-
 
 @MainActor
 final class SubscriptionViewModel: ObservableObject {
 
     @Published var isLoading: Bool = false
 
-    // MARK: - 복원
-    func restore() {
-        Task {
-            isLoading = true
-            // TODO: StoreKit 2 복원 로직 연결
-            print("구독 복원 시도")
-            try? await Task.sleep(nanoseconds: 1_000_000_000)
-            isLoading = false
-        }
-    }
-    
+    private let manager = SubscriptionManager.shared
+
+    var products: [Product] { manager.products }
+
     func purchaseMonthly() {
+        guard let product = manager.products.first(where: {
+            $0.id == SubscriptionManager.monthlyID
+        }) else {
+            showError("상품 정보를 불러올 수 없어요.")
+            return
+        }
+        purchase(product)
+    }
+
+    func purchaseYearly() {
+        guard let product = manager.products.first(where: {
+            $0.id == SubscriptionManager.yearlyID
+        }) else {
+            showError("상품 정보를 불러올 수 없어요.")
+            return
+        }
+        purchase(product)
+    }
+
+    private func purchase(_ product: Product) {
         Task {
             isLoading = true
-            // TODO: StoreKit 2 연결
+            do {
+                _ = try await manager.purchase(product)
+            } catch {
+                showError("결제 중 오류가 발생했어요. 다시 시도해주세요.")
+            }
             isLoading = false
         }
     }
 
-    func purchaseYearly() {
+    func restore() {
         Task {
             isLoading = true
-            // TODO: StoreKit 2 연결
+            await manager.restorePurchases()
+            if !manager.isSubscribed {
+                showError("복원할 구독 내역이 없어요.")
+            }
             isLoading = false
         }
+    }
+
+    private func showError(_ message: String) {
+        NavigationRouter.shared.showAlert(
+            AlertModel(
+                title: "안내",
+                message: message,
+                cancelTitle: "",
+                confirmTitle: "확인"
+            )
+        )
     }
 }

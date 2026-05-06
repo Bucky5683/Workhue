@@ -13,9 +13,14 @@ struct WorkhueApp: App {
     @StateObject private var router = NavigationRouter.shared
     @StateObject private var appThemeStore = AppThemeStore.shared
 
+    // listener Task 유지용
+    private let updateListenerTask: Task<Void, Error>
+    
     init() {
         // UserDefaults → SwiftData 단 1회 마이그레이션
         MigrationManager.migrateIfNeeded()
+        // 앱 시작 직후 listener 등록 (외부 결제/다른 기기 결제 놓치지 않으려면 여기서)
+        updateListenerTask = SubscriptionManager.shared.listenForTransactions()
     }
 
     var body: some Scene {
@@ -24,6 +29,11 @@ struct WorkhueApp: App {
                 .preferredColorScheme(appThemeStore.selectedMode.colorScheme)
                 .id(appThemeStore.selectedMode)
                 .modelContainer(SwiftDataManager.shared.container)
+                .task {
+                    // 상품 로드 + 구독 상태 복원
+                    await SubscriptionManager.shared.loadProducts()
+                    await SubscriptionManager.shared.updateSubscriptionStatus()
+                }
         }
     }
 }
