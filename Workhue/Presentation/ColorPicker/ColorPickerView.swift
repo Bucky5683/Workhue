@@ -62,8 +62,9 @@ struct ColorPickerView: View {
                     .foregroundStyle(Color.System.text)
 
                 HStack(spacing: 16) {
+                    // 색상 원 표시 부분
                     Circle()
-                        .fill(store.aiColor.color)   // ← aiColor로 고정
+                        .fill(customColor(for: store.selectedColor, hex: store.selectedCustomHex))
                         .frame(width: 56, height: 56)
 
                     VStack(alignment: .leading, spacing: 4) {
@@ -127,6 +128,13 @@ struct ColorPickerView: View {
                 .hologramSunset
             ]
         )
+    }
+    
+    private func customColor(for color: WorkColor, hex: String?) -> Color {
+        if color == .custom, let hex {
+            return Color(hex: hex)
+        }
+        return color.color
     }
 
     private func colorGridSection(

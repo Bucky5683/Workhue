@@ -92,18 +92,8 @@ struct ColorPickerFeature {
                 }
                 state.selectedColor = .custom
                 state.selectedCustomHex = normalizedHex
-
-                // 이미 저장된 것과 중복이면 저장 스킵
-                guard !state.customHexList.contains(normalizedHex) else {
-                    return .none
-                }
-                state.customHexList.append(normalizedHex)
-
-                return .run { @MainActor [hex = normalizedHex] _ in
-                    let context = SwiftDataManager.shared.context
-                    let repo = StreakRepositoryImpl(context: context)
-                    try? await repo.addCustomHex(hex)
-                }
+                // 저장은 CheckOutReviewViewModel에서만 함
+                return .none
             case .alertDismissed:
                 state.alertMessage = nil
                 return .none
