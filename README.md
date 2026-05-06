@@ -35,11 +35,11 @@
 | UI Framework | SwiftUI |
 | Architecture | Clean Architecture + MVVM |
 | State Management | TCA (ColorPickerView) |
-| Local Storage | UserDefaults (SwiftData 전환 예정) |
+| Local Storage | SwiftData |
 | Sync | CloudKit (iCloud) |
-| AI | OpenAI GPT-4o-mini |
-| Subscription | StoreKit 2 (구현 예정) |
-| AD | Google AdMob (구현 예정) |
+| AI | OpenAI GPT-4o-mini (Cloudflare Worker 프록시) |
+| Subscription | StoreKit 2 |
+| AD | Google AdMob (보상형 광고) |
 | Notification | UNUserNotification |
 
 ---
@@ -66,7 +66,6 @@
 ---
 
 ## 📂 Project Structure
-
 ```
 Workhue/
 ├── Presentation/
@@ -90,12 +89,11 @@ Workhue/
 │       ├── Local/
 │       └── CloudKit/
 └── Common/
-    ├── Components/
-    ├── Extensions/
-    ├── Store/
-    └── Enum/
+├── Components/
+├── Extensions/
+├── Store/
+└── Enum/
 ```
-
 ---
 
 ## 🎨 Color System
@@ -129,12 +127,11 @@ Workhue/
 | 해금 색상 화면 | ✅ 완료 |
 | 앱 테마 화면 | ✅ 완료 |
 | 앱 아이콘 변경 (구조) | ✅ 완료 (디자인 보류) |
-| ColorPickerView | 🔄 구현 예정 (TCA) |
-| AdMob 광고 연동 | 🔄 구현 예정 |
-| StoreKit 2 실제 결제 | 🔄 구현 예정 |
-| OpenAI API Key 백엔드 프록시 | 🔄 구현 예정 |
+| ColorPickerView (TCA) | ✅ 완료 |
+| StoreKit 2 실제 결제 | ✅ 완료 |
+| AdMob 보상형 광고 연동 | ✅ 완료 |
+| OpenAI API Key 백엔드 프록시 | ✅ 완료 (Cloudflare Worker) |
 | CloudKit pagination | 🔄 개선 필요 |
-| UserDefaults → SwiftData 전환 | 🔄 검토 중 |
 
 ---
 
@@ -149,9 +146,12 @@ Workhue/
 ## 🔧 Setup
 
 1. 저장소 클론
-2. `Workhue/Config.plist` 생성 후 `OPENAI_API_KEY` 추가 (`.gitignore` 처리됨)
+2. `Workhue/Config.plist` 생성 후 아래 키 추가 (`.gitignore` 처리됨)
+   - `BASE_API_URL`: Cloudflare Worker URL
+   - `GADRewardedAdUnitID`: AdMob 보상형 광고 단위 ID
 3. CloudKit 사용 시 Apple Developer 계정 + iCloud 컨테이너 설정 필요
-4. Xcode에서 빌드 및 실행
+4. StoreKit 테스트 시 Scheme → Run → Options → StoreKit Configuration 선택
+5. Xcode에서 빌드 및 실행
 
 ---
 
@@ -160,7 +160,7 @@ Workhue/
 | 항목 | 내용 |
 | --- | --- |
 | 개발자 | 서연 |
-| 기간 | 2025.05 ~ |
+| 기간 | 2026.05 ~ |
 | 문의 | 추후 추가 |
 
 ---
