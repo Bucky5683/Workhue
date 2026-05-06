@@ -46,7 +46,13 @@ final class SubscriptionManager: ObservableObject {
     }
 
     // MARK: - 구매
-    func purchase(_ product: Product) async throws -> Bool {
+    enum PurchaseOutcome {
+        case success
+        case cancelled
+        case pending
+    }
+
+    func purchase(_ product: Product) async throws -> PurchaseOutcome {
         let result = try await product.purchase()
 
         switch result {
@@ -54,16 +60,16 @@ final class SubscriptionManager: ObservableObject {
             let transaction = try checkVerified(verification)
             await updateSubscriptionStatus()
             await transaction.finish()
-            return true
+            return .success
 
         case .userCancelled:
-            return false
+            return .cancelled
 
         case .pending:
-            return false
+            return .pending
 
         @unknown default:
-            return false
+            return .cancelled
         }
     }
 

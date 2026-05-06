@@ -42,8 +42,13 @@ final class SubscriptionViewModel: ObservableObject {
         Task {
             isLoading = true
             do {
-                let result = try await manager.purchase(product)
-                if !result {
+                let outcome = try await manager.purchase(product)
+                switch outcome {
+                case .success:
+                    break
+                case .cancelled:
+                    break  // 아무 안내 불필요
+                case .pending:
                     showAlert(title: "안내", message: "결제가 보류 중이에요. 승인 후 자동으로 처리돼요.")
                 }
             } catch {
