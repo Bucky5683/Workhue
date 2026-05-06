@@ -32,6 +32,7 @@ final class RewardedAdManager: NSObject, ObservableObject {
 
     private var rewardedAd: RewardedAd?
     private var adContinuation: CheckedContinuation<Bool, Never>?
+    private var didEarnReward = false
 
     private override init() {
         super.init()
@@ -66,19 +67,14 @@ final class RewardedAdManager: NSObject, ObservableObject {
             return false
         }
 
-        return await withCheckedContinuation { continuation in
-            self.adContinuation = continuation
-            var didEarnReward = false
+        didEarnReward = false
 
+        return await withCheckedContinuation { continuation in
+            adContinuation = continuation
             ad.present(from: rootVC) { [weak self] in
-                didEarnReward = true
-                // resume은 dismiss에서 한 번만 호출
-                _ = didEarnReward
-                self?.adContinuation?.resume(returning: true)
-                self?.adContinuation = nil
-                self?.rewardedAd = nil
-                self?.isAdReady = false
-                self?.loadAd()
+                Task { @MainActor in
+                    self?.didEarnReward = true
+                }
             }
         }
     }
@@ -98,23 +94,28 @@ extension RewardedAdManager: FullScreenContentDelegate {
     // 광고 닫힘 (리워드 못 받고 닫은 경우)
     nonisolated func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
         Task { @MainActor in
-            self.adContinuation?.resume(returning: false)
-            self.adContinuation = nil
-            self.rewardedAd = nil
-            self.isAdReady = false
-            self.loadAd()
+            adContinuation?.resume(returning: didEarnReward)
+            adContinuation = nil
+            didEarnReward = false
+            rewardedAd = nil
+            isAdReady = false
+            loadAd()
         }
     }
 
     // 광고 표시 실패
-    nonisolated func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+    nonisolated func ad(
+        _ ad: FullScreenPresentingAd,
+        didFailToPresentFullScreenContentWithError error: Error
+    ) {
         Task { @MainActor in
             print("광고 표시 실패: \(error.localizedDescription)")
-            self.adContinuation?.resume(returning: false)
-            self.adContinuation = nil
-            self.rewardedAd = nil
-            self.isAdReady = false
-            self.loadAd()
+            adContinuation?.resume(returning: false)
+            adContinuation = nil
+            didEarnReward = false
+            rewardedAd = nil
+            isAdReady = false
+            loadAd()
         }
     }
 }

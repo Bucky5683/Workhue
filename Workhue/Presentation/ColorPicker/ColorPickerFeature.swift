@@ -113,8 +113,8 @@ struct ColorPickerFeature {
                 return .send(.adWatchRequested(.customHex(normalizedHex)))
 
             case .confirmTapped:
-                // 기본 색상은 광고 없이 바로
-                if WorkColor.analyzableColors.contains(state.selectedColor) {
+                // 색상 변경 없으면 바로 확정
+                if state.selectedColor == state.aiColor && state.selectedCustomHex == nil {
                     state.shouldConfirm = true
                     return .none
                 }
@@ -125,7 +125,7 @@ struct ColorPickerFeature {
                     state.shouldConfirm = true
                     return .none
                 }
-                // 광고 필요
+                // 무료 사용자 or 구독자 1회 초과
                 return .send(.adWatchRequested(.colorChange(state.selectedColor)))
 
             case let .adWatchRequested(trigger):
