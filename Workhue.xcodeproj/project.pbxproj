@@ -10,12 +10,10 @@
 		EB7E0F4D2F9C88220070D45F /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = EB7E0F4C2F9C88220070D45F /* ComposableArchitecture */; };
 		EB7E0F502F9C88790070D45F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = EB7E0F4F2F9C88790070D45F /* FirebaseAnalytics */; };
 		EB7E0F522F9C88790070D45F /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = EB7E0F512F9C88790070D45F /* FirebaseCrashlytics */; };
-		EBD862C72FA1FEC10043D40B /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = EBD862C62FA1FEC10043D40B /* Config.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		EB7E0F372F9C876B0070D45F /* Workhue.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Workhue.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		EBD862C62FA1FEC10043D40B /* Config.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Config.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -43,7 +41,6 @@
 		EB7E0F2E2F9C876B0070D45F = {
 			isa = PBXGroup;
 			children = (
-				EBD862C62FA1FEC10043D40B /* Config.plist */,
 				EB7E0F392F9C876B0070D45F /* Workhue */,
 				EB7E0F382F9C876B0070D45F /* Products */,
 			);
@@ -128,7 +125,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EBD862C72FA1FEC10043D40B /* Config.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
