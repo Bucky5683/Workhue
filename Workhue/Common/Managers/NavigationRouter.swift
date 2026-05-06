@@ -55,6 +55,7 @@ final class NavigationRouter: ObservableObject {
 
     func dismiss() {
         presentedView = nil
+        colorPickerCompletion = nil
     }
 
     func showAlert(_ model: AlertModel) {

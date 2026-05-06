@@ -41,6 +41,7 @@ struct ColorPickerFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
+                state.isLoading = true   // ← 추가
                 return .run { send in
                     let result = await MainActor.run {
                         let context = SwiftDataManager.shared.context
@@ -63,6 +64,7 @@ struct ColorPickerFeature {
                 }
 
             case let .unlockedColorsLoaded(colors, hexList, isSubscriber):
+                state.isLoading = false  // ← 추가
                 state.unlockedColors = colors
                 state.customHexList = hexList
                 state.isSubscriber = isSubscriber
@@ -84,16 +86,24 @@ struct ColorPickerFeature {
 
             case .customHexConfirmTapped:
                 let normalizedHex = normalizeHex(state.hexText)
-
                 guard isValidHex(normalizedHex) else {
                     state.alertMessage = "올바른 Hex 색상을 입력해주세요."
                     return .none
                 }
-
                 state.selectedColor = .custom
                 state.selectedCustomHex = normalizedHex
-                return .none
 
+                // 이미 저장된 것과 중복이면 저장 스킵
+                guard !state.customHexList.contains(normalizedHex) else {
+                    return .none
+                }
+                state.customHexList.append(normalizedHex)
+
+                return .run { @MainActor [hex = normalizedHex] _ in
+                    let context = SwiftDataManager.shared.context
+                    let repo = StreakRepositoryImpl(context: context)
+                    try? await repo.addCustomHex(hex)
+                }
             case .alertDismissed:
                 state.alertMessage = nil
                 return .none

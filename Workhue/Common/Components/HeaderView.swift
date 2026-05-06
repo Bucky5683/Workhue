@@ -24,7 +24,7 @@ struct HeaderView: View {
             case .back(let title):
                 HStack(spacing: 10) {
                     Button {
-                        NavigationRouter.shared.pop()
+                        NavigationRouter.shared.close()
                     } label: {
                         Image(systemName: "chevron.left")
                             .foregroundStyle(Color.System.text)
