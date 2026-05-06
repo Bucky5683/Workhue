@@ -66,8 +66,8 @@ final class SubscriptionViewModel: ObservableObject {
             AlertModel(
                 title: "안내",
                 message: message,
-                cancelTitle: "",
-                confirmTitle: "확인"
+                confirmTitle: "확인",
+                cancelTitle: ""
             )
         )
     }
