@@ -82,7 +82,7 @@ final class SubscriptionManager: ObservableObject {
                 if transaction.productID == Self.monthlyID ||
                    transaction.productID == Self.yearlyID {
                     if !transaction.isUpgraded {
-                        subscribed = true  // 유효한 구독 하나라도 있으면 true, 덮어쓰기 없음
+                        subscribed = true
                     }
                 }
             }
