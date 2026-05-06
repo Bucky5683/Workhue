@@ -68,8 +68,8 @@ final class SubscriptionManager: ObservableObject {
     }
 
     // MARK: - 복원
-    func restorePurchases() async {
-        try? await AppStore.sync()
+    func restorePurchases() async throws {
+        try await AppStore.sync()
         await updateSubscriptionStatus()
     }
 
@@ -81,7 +81,9 @@ final class SubscriptionManager: ObservableObject {
             if case .verified(let transaction) = result {
                 if transaction.productID == Self.monthlyID ||
                    transaction.productID == Self.yearlyID {
-                    subscribed = !transaction.isUpgraded
+                    if !transaction.isUpgraded {
+                        subscribed = true  // 유효한 구독 하나라도 있으면 true, 덮어쓰기 없음
+                    }
                 }
             }
         }

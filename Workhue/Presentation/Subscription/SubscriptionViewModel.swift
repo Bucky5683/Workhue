@@ -42,9 +42,12 @@ final class SubscriptionViewModel: ObservableObject {
         Task {
             isLoading = true
             do {
-                _ = try await manager.purchase(product)
+                let result = try await manager.purchase(product)
+                if !result {
+                    showAlert(title: "안내", message: "결제가 보류 중이에요. 승인 후 자동으로 처리돼요.")
+                }
             } catch {
-                showError("결제 중 오류가 발생했어요. 다시 시도해주세요.")
+                showAlert(title: "결제 실패", message: "결제 중 오류가 발생했어요. 다시 시도해주세요.")
             }
             isLoading = false
         }
@@ -53,9 +56,13 @@ final class SubscriptionViewModel: ObservableObject {
     func restore() {
         Task {
             isLoading = true
-            await manager.restorePurchases()
-            if !manager.isSubscribed {
-                showError("복원할 구독 내역이 없어요.")
+            do {
+                try await manager.restorePurchases()
+                if !manager.isSubscribed {
+                    showAlert(title: "복원 완료", message: "복원할 구독 내역이 없어요.")
+                }
+            } catch {
+                showAlert(title: "복원 실패", message: "네트워크 오류 또는 인증 실패가 발생했어요. 다시 시도해주세요.")
             }
             isLoading = false
         }
@@ -68,6 +75,16 @@ final class SubscriptionViewModel: ObservableObject {
                 message: message,
                 confirmTitle: "확인",
                 cancelTitle: ""
+            )
+        )
+    }
+    
+    private func showAlert(title: String, message: String) {
+        NavigationRouter.shared.showAlert(
+            AlertModel(
+                title: title,
+                message: message,
+                confirmTitle: "확인", cancelTitle: ""
             )
         )
     }
