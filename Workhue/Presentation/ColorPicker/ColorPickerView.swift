@@ -5,7 +5,6 @@
 //  Created by 김서연 on 5/4/26.
 //
 
-
 import SwiftUI
 import ComposableArchitecture
 
@@ -37,28 +36,18 @@ struct ColorPickerView: View {
         .onAppear {
             store.send(.onAppear)
         }
-        .alert(
-            "안내",
-            isPresented: .init(
-                get: { store.alertMessage != nil },
-                set: { _ in store.send(.alertDismissed) }
-            )
-        ) {
-            Button("확인") {
-                store.send(.alertDismissed)
+        .onChange(of: store.shouldConfirm) { _, newValue in
+            if newValue {
+                onConfirm(store.selectedColor, store.selectedCustomHex)
             }
-        } message: {
-            Text(store.alertMessage ?? "")
         }
     }
 
-    // aiColor는 고정 표시, selectedColor가 다를 때만 "선택한 색상" 섹션 추가 노출
     private var selectedColorSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // AI 추천 색상 카드: 원도 텍스트도 aiColor 고정
             HStack(spacing: 16) {
                 Circle()
-                    .fill(store.aiColor.color)  // ← aiColor 고정
+                    .fill(store.aiColor.color)
                     .frame(width: 56, height: 56)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(store.aiColor.title)
@@ -74,11 +63,10 @@ struct ColorPickerView: View {
             .background(Color.System.sub.opacity(0.3))
             .clipShape(RoundedRectangle(cornerRadius: 12))
 
-            // 선택한 색상 섹션: 헬퍼로 실제 Hex 색 표시
             if store.selectedColor != store.aiColor || store.selectedCustomHex != nil {
                 HStack(spacing: 12) {
                     Circle()
-                        .fill(customColor(for: store.selectedColor, hex: store.selectedCustomHex))  // ← 헬퍼
+                        .fill(customColor(for: store.selectedColor, hex: store.selectedCustomHex))
                         .frame(width: 32, height: 32)
                     Text(store.selectedColor == .custom
                          ? (store.selectedCustomHex ?? store.selectedColor.title)
@@ -102,22 +90,13 @@ struct ColorPickerView: View {
         colorGridSection(
             title: "해금 색상",
             colors: [
-                .gold,
-                .roseGold,
-                .forestGreen,
-                .sunsetOrange,
-                .pink,
-                .mint,
-                .lilac,
-                .peach,
-                .silver,
-                .hologramPink,
-                .hologramOcean,
-                .hologramSunset
+                .gold, .roseGold, .forestGreen, .sunsetOrange,
+                .pink, .mint, .lilac, .peach,
+                .silver, .hologramPink, .hologramOcean, .hologramSunset
             ]
         )
     }
-    
+
     private func customColor(for color: WorkColor, hex: String?) -> Color {
         if color == .custom, let hex {
             return Color(hex: hex)
@@ -200,10 +179,9 @@ struct ColorPickerView: View {
                     store.send(.customHexConfirmTapped)
                 } label: {
                     HStack(spacing: 4) {
-                        if !store.isSubscriber {
-                            Image(systemName: "play.rectangle.fill")
-                                .font(.system(size: 12))
-                        }
+                        // 구독자도 커스텀 Hex는 광고 필요
+                        Image(systemName: "play.rectangle.fill")
+                            .font(.system(size: 12))
                         Text("적용")
                             .font(.system(size: FontSize.md, weight: .semibold))
                     }
@@ -219,7 +197,7 @@ struct ColorPickerView: View {
 
     private var confirmButton: some View {
         Button {
-            onConfirm(store.selectedColor, store.selectedCustomHex)
+            store.send(.confirmTapped)
         } label: {
             Text("이 색상으로 변경")
                 .font(.system(size: FontSize.lg, weight: .semibold))
@@ -257,6 +235,7 @@ struct ColorPickerView: View {
         }
     )
 }
+
 #Preview("ColorPicker - 해금 색상 포함") {
     ColorPickerView(
         store: Store(
@@ -264,24 +243,14 @@ struct ColorPickerView: View {
                 aiColor: .skyBlue,
                 selectedColor: .gold,
                 unlockedColors: [
-                    .gold,
-                    .roseGold,
-                    .forestGreen,
-                    .pink,
-                    .mint,
-                    .silver,
-                    .hologramOcean
+                    .gold, .roseGold, .forestGreen,
+                    .pink, .mint, .silver, .hologramOcean
                 ],
-                customHexList: [
-                    "#FFAA00",
-                    "#8B5CF6",
-                    "#10B981"
-                ],
+                customHexList: ["#FFAA00", "#8B5CF6", "#10B981"],
                 hexText: "",
                 selectedCustomHex: nil,
                 isSubscriber: true,
-                isLoading: false,
-                alertMessage: nil
+                isLoading: false
             )
         ) {
             ColorPickerFeature()

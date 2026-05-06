@@ -14,28 +14,29 @@ final class RewardedAdManager: NSObject, ObservableObject {
 
     static let shared = RewardedAdManager()
 
-    // 출시 전 실제 광고 단위 ID로 교체
+    #if DEBUG
+    private let adUnitID = "ca-app-pub-3940256099942544/1712485313"
+    #else
     private let adUnitID: String = {
-        #if DEBUG
-        return "ca-app-pub-3940256099942544/1712485313"  // 테스트 ID
-        #else
-        guard let id = Bundle.main.object(forInfoDictionaryKey: "GADRewardedAdUnitID") as? String else {
+        guard let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
+              let config = NSDictionary(contentsOfFile: path),
+              let id = config["GADRewardedAdUnitID"] as? String else {
             fatalError("GADRewardedAdUnitID not found in Config.plist")
         }
         return id
-        #endif
     }()
+    #endif
 
     @Published private(set) var isAdReady: Bool = false
     @Published private(set) var isLoading: Bool = false
 
     private var rewardedAd: RewardedAd?
+    private var adContinuation: CheckedContinuation<Bool, Never>?
 
     private override init() {
         super.init()
     }
 
-    // MARK: - 광고 로드
     func loadAd() {
         guard !isLoading else { return }
         isLoading = true
@@ -53,37 +54,67 @@ final class RewardedAdManager: NSObject, ObservableObject {
                 }
 
                 self.rewardedAd = ad
+                self.rewardedAd?.fullScreenContentDelegate = self
                 self.isAdReady = true
             }
         }
     }
 
-    // MARK: - 광고 표시
     func showAd() async -> Bool {
-        await withCheckedContinuation { continuation in
-            Task { @MainActor in
-                guard let ad = rewardedAd,
-                      let rootVC = currentRootViewController() else {
-                    continuation.resume(returning: false)
-                    return
-                }
+        guard let ad = rewardedAd,
+              let rootVC = currentRootViewController() else {
+            return false
+        }
 
-                ad.present(from: rootVC) { [weak self] in
-                    continuation.resume(returning: true)
-                    self?.rewardedAd = nil
-                    self?.isAdReady = false
-                    self?.loadAd()
-                }
+        return await withCheckedContinuation { continuation in
+            self.adContinuation = continuation
+            var didEarnReward = false
+
+            ad.present(from: rootVC) { [weak self] in
+                didEarnReward = true
+                // resume은 dismiss에서 한 번만 호출
+                _ = didEarnReward
+                self?.adContinuation?.resume(returning: true)
+                self?.adContinuation = nil
+                self?.rewardedAd = nil
+                self?.isAdReady = false
+                self?.loadAd()
             }
         }
     }
 
-    // MARK: - 루트 ViewController 가져오기
     private func currentRootViewController() -> UIViewController? {
         UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .flatMap { $0.windows }
             .first { $0.isKeyWindow }?
             .rootViewController
+    }
+}
+
+// MARK: - FullScreenContentDelegate
+extension RewardedAdManager: FullScreenContentDelegate {
+
+    // 광고 닫힘 (리워드 못 받고 닫은 경우)
+    nonisolated func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
+        Task { @MainActor in
+            self.adContinuation?.resume(returning: false)
+            self.adContinuation = nil
+            self.rewardedAd = nil
+            self.isAdReady = false
+            self.loadAd()
+        }
+    }
+
+    // 광고 표시 실패
+    nonisolated func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+        Task { @MainActor in
+            print("광고 표시 실패: \(error.localizedDescription)")
+            self.adContinuation?.resume(returning: false)
+            self.adContinuation = nil
+            self.rewardedAd = nil
+            self.isAdReady = false
+            self.loadAd()
+        }
     }
 }
