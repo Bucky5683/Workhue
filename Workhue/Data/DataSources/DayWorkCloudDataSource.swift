@@ -12,31 +12,53 @@ final class DayWorkCloudDataSource {
     private var database: CKDatabase { container.privateCloudDatabase }
     private let recordType = "DayWork"
 
+    // MARK: - Fetch All (with Pagination)
     func fetchAll() async throws -> [DayWorkDTO] {
         let query = CKQuery(
             recordType: recordType,
             predicate: NSPredicate(value: true)
         )
+        query.sortDescriptors = [
+            NSSortDescriptor(key: "date", ascending: true)
+        ]
 
-        var allRecords: [CKRecord] = []
-        var cursor: CKQueryOperation.Cursor? = nil
+        let pageLimit = 100
+        var records: [CKRecord] = []
 
-        // 첫 번째 요청
+        // 첫 번째 페이지
         let firstResult = try await database.records(
             matching: query,
-            resultsLimit: 100
+            resultsLimit: pageLimit
         )
-        allRecords += firstResult.matchResults.compactMap { try? $0.1.get() }
-        cursor = firstResult.queryCursor
+        appendSuccessRecords(from: firstResult.matchResults, to: &records)
 
-        // cursor가 있는 한 계속 다음 페이지 요청
+        // 다음 페이지 반복
+        var cursor = firstResult.queryCursor
         while let currentCursor = cursor {
-            let nextResult = try await database.records(continuingMatchFrom: currentCursor)
-            allRecords += nextResult.matchResults.compactMap { try? $0.1.get() }
+            let nextResult = try await database.records(
+                continuingMatchFrom: currentCursor,
+                resultsLimit: pageLimit
+            )
+            appendSuccessRecords(from: nextResult.matchResults, to: &records)
             cursor = nextResult.queryCursor
         }
 
-        return allRecords.compactMap { DayWorkDTO(from: $0) }
+        return records.compactMap { DayWorkDTO(from: $0) }
+    }
+
+    // MARK: - Private Helper
+    private func appendSuccessRecords(
+        from matchResults: [(CKRecord.ID, Result<CKRecord, Error>)],
+        to records: inout [CKRecord]
+    ) {
+        for (_, result) in matchResults {
+            switch result {
+            case .success(let record):
+                records.append(record)
+            case .failure(let error):
+                print("[CloudKit] record fetch failed:", error)
+            }
+        }
     }
 
     func save(_ dto: DayWorkDTO) async throws {
