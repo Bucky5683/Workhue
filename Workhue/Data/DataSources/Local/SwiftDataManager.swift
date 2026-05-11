@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 
+@MainActor
 final class SwiftDataManager {
 
     static let shared = SwiftDataManager()

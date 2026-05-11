@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 
+@MainActor
 struct DayWorkLocalDataSource {
 
     private let context: ModelContext

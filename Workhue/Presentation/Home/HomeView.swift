@@ -71,6 +71,9 @@ struct HomeView: View {
         .onAppear {
             viewModel.loadToday()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .workhueSyncDidFinish)) { _ in
+            viewModel.loadToday()  // ✅ sync 완료 후 자동 갱신
+        }
         
         // 로딩 오버레이
         if viewModel.isLoading {

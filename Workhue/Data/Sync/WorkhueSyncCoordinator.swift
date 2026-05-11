@@ -7,9 +7,11 @@
 
 import Foundation
 
+@MainActor
 final class WorkhueSyncCoordinator {
     private let localDataSource: DayWorkLocalDataSource
     private let cloudDataSource: DayWorkCloudDataSource
+    private var isSyncing = false  // ✅ 추가
 
     var onConflict: ((DayWorkDTO) -> Void)?  // ✅ UI 직접 호출 제거
 
@@ -19,15 +21,20 @@ final class WorkhueSyncCoordinator {
     }
 
     func syncNow() async {
-        let shouldSync = await MainActor.run { SubscriptionManager.shared.useICloud }
-        guard shouldSync else { return }
+        guard !isSyncing else { return }
+        isSyncing = true
+        defer { isSyncing = false }
+
+        guard SubscriptionManager.shared.useICloud else { return }
+
         await pullRemoteChanges()
         await pushPendingLocalChanges()
+
+        NotificationCenter.default.post(name: .workhueSyncDidFinish, object: nil)  // ✅
     }
 
     func pullRemoteChanges() async {
-        let shouldSync = await MainActor.run { SubscriptionManager.shared.useICloud }
-        guard shouldSync else { return }
+        guard SubscriptionManager.shared.useICloud else { return }
         do {
             let remoteAll = try await cloudDataSource.fetchAll()
             for remote in remoteAll {
@@ -39,8 +46,7 @@ final class WorkhueSyncCoordinator {
     }
 
     func pushPendingLocalChanges() async {
-        let shouldSync = await MainActor.run { SubscriptionManager.shared.useICloud }
-        guard shouldSync else { return }
+        guard SubscriptionManager.shared.useICloud else { return }
         guard let pending = try? localDataSource.fetchPending() else { return }
         for dto in pending {
             do {
