@@ -10,8 +10,7 @@ struct WorkDetailView: View {
     init(workModel: DayWorkModel, onSave: (() -> Void)? = nil) {
         self.workModel = workModel
         self.onSave = onSave
-        let local = DayWorkLocalDataSource(context: SwiftDataManager.shared.context)
-        let repo = DayWorkRepositoryImpl(local: local)
+        let repo = SwiftDataManager.shared.makeDayWorkRepository()
         let saveUseCase = SaveDayWorkUseCase(repository: repo)
         _viewModel = StateObject(wrappedValue: WorkDetailViewModel(
             workModel: workModel,

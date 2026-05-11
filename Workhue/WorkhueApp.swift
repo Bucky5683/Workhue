@@ -11,6 +11,7 @@ import GoogleMobileAds
 
 @main
 struct WorkhueApp: App {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var router = NavigationRouter.shared
     @StateObject private var appThemeStore = AppThemeStore.shared
 
@@ -35,8 +36,15 @@ struct WorkhueApp: App {
                     // 상품 로드 + 구독 상태 복원
                     await SubscriptionManager.shared.loadProducts()
                     await SubscriptionManager.shared.updateSubscriptionStatus()
-                    RewardedAdManager.shared.loadAd()  // 추가
+                    RewardedAdManager.shared.loadAd()
+                    await SwiftDataManager.shared.syncCoordinator.syncNow()
                 }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            Task {
+                await SwiftDataManager.shared.syncCoordinator.syncNow()  // ✅ foreground 복귀 sync
+            }
         }
     }
 }

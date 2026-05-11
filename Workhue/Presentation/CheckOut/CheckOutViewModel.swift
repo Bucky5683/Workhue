@@ -25,10 +25,7 @@ final class CheckOutViewModel: ObservableObject {
         self.goals = workModel.checkList.map {
             GoalItem(id: $0.id, content: $0.content, isDone: $0.isDone, isEditing: false)
         }
-        // ViewModel init에서
-        let context = SwiftDataManager.shared.context  // 한 번만
-        let local = DayWorkLocalDataSource(context: context)
-        let repo = DayWorkRepositoryImpl(local: local)
+        let repo = SwiftDataManager.shared.makeDayWorkRepository()
         self.saveUseCase = SaveDayWorkUseCase(repository: repo)
     }
 

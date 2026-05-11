@@ -30,12 +30,10 @@ final class CheckOutReviewViewModel: ObservableObject {
         self.analyzedColor = workModel.workColor
         self.selectedCustomHex = workModel.customHex
 
-        let context = SwiftDataManager.shared.context
-        let local = DayWorkLocalDataSource(context: context)
-        let repo = DayWorkRepositoryImpl(local: local)
+        let repo = SwiftDataManager.shared.makeDayWorkRepository()
         self.saveUseCase = SaveDayWorkUseCase(repository: repo)
         self.getUseCase = GetDayWorkUseCase(repository: repo)
-        self.streakRepo = StreakRepositoryImpl(context: context)
+        self.streakRepo = StreakRepositoryImpl(context: SwiftDataManager.shared.context)
         self.apiClient = WorkhueAPIClient()
     }
 

@@ -19,10 +19,7 @@ struct SyncConflictResolver {
 
     // 서버 데이터로 덮어쓰기
     func resolveWithServer(dateKey: String) async throws {
-        // 서버에서 최신 데이터 가져오기
-        let recordID = CKRecord.ID(recordName: "daywork_\(dateKey)")
-        let record = try await cloudDataSource.database.record(for: recordID)
-        guard var serverDTO = DayWorkDTO(from: record) else { return }
+        guard var serverDTO = try await cloudDataSource.fetch(dateKey: dateKey) else { return }
         serverDTO.syncStatus = SyncStatus.synced.rawValue
         try localDataSource.save(serverDTO)
     }

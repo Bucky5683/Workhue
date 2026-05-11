@@ -12,6 +12,16 @@ final class DayWorkCloudDataSource {
     private var database: CKDatabase { container.privateCloudDatabase }
     private let recordType = "DayWork"
 
+    func fetch(dateKey: String) async throws -> DayWorkDTO? {
+        let recordID = recordID(for: dateKey)
+        do {
+            let record = try await database.record(for: recordID)
+            return DayWorkDTO(from: record)
+        } catch let error as CKError where error.code == .unknownItem {
+            return nil
+        }
+    }
+    
     // MARK: - Fetch All (with Pagination)
     func fetchAll() async throws -> [DayWorkDTO] {
         let query = CKQuery(
