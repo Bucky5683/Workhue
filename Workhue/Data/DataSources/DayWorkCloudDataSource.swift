@@ -60,26 +60,30 @@ final class DayWorkCloudDataSource {
             }
         }
     }
-
-    func save(_ dto: DayWorkDTO) async throws {
-        let query = CKQuery(
-            recordType: recordType,
-            predicate: NSPredicate(format: "id == %@", dto.id)
-        )
-        let result = try await database.records(matching: query)
-        let existing = result.matchResults.compactMap { try? $0.1.get() }.first
-        let record = existing ?? CKRecord(recordType: recordType)
-        dto.apply(to: record)
-        try await database.save(record)
+    
+    private func recordID(for dateKey: String) -> CKRecord.ID {
+        CKRecord.ID(recordName: "daywork_\(dateKey)")
     }
 
-    func delete(id: String) async throws {
-        let query = CKQuery(
-            recordType: recordType,
-            predicate: NSPredicate(format: "id == %@", id)
-        )
-        let result = try await database.records(matching: query)
-        guard let record = result.matchResults.compactMap({ try? $0.1.get() }).first else { return }
-        try await database.deleteRecord(withID: record.recordID)
+    func save(_ dto: DayWorkDTO) async throws -> String? {
+        let recordID = recordID(for: dto.dateKey)
+        
+        // 기존 레코드 fetch 시도
+        let existingRecord: CKRecord
+        do {
+            existingRecord = try await database.record(for: recordID)
+        } catch {
+            // 없으면 새로 생성
+            existingRecord = CKRecord(recordType: recordType, recordID: recordID)
+        }
+        
+        dto.apply(to: existingRecord)
+        let saved = try await database.save(existingRecord)
+        return saved.recordChangeTag  // cloudChangeTag로 저장
+    }
+
+    func delete(dateKey: String) async throws {
+        let recordID = recordID(for: dateKey)
+        try await database.deleteRecord(withID: recordID)
     }
 }

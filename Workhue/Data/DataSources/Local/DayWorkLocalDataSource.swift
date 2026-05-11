@@ -22,7 +22,9 @@ struct DayWorkLocalDataSource {
             sortBy: [SortDescriptor(\.date, order: .forward)]
         )
         let entities = try context.fetch(descriptor)
-        return entities.compactMap { $0.toDTO().toModel() }
+        return entities
+            .filter { !$0.isDeleted }          // ✅ Entity 레벨에서 필터
+            .compactMap { $0.toDTO().toModel() }
     }
 
     // MARK: - 날짜 기준 조회
@@ -57,8 +59,14 @@ struct DayWorkLocalDataSource {
             existing.checkItems = dto.checkList.map {
                 WorkCheckListEntity(id: $0.id, content: $0.content, isDone: $0.isDone)
             }
+            // ✅ 여기 추가
+            existing.dateKey = dto.dateKey
+            existing.updatedAt = dto.updatedAt
+            existing.isDeleted = dto.isDeleted
+            existing.syncStatus = dto.syncStatus
+            existing.cloudChangeTag = dto.cloudChangeTag
         } else {
-            let entity = DayWorkEntity.from(dto)
+            let entity = DayWorkEntity.from(dto)  // ← from()에도 매핑 필요
             context.insert(entity)
         }
         try context.save()
@@ -72,5 +80,61 @@ struct DayWorkLocalDataSource {
             context.delete(entity)
             try context.save()
         }
+    }
+}
+
+// MARK: - Sync 지원 메서드
+extension DayWorkLocalDataSource {
+
+    // dateKey 기준 단건 조회
+    func fetch(dateKey: String) throws -> DayWorkDTO? {
+        let predicate = #Predicate<DayWorkEntity> { $0.dateKey == dateKey }
+        var descriptor = FetchDescriptor<DayWorkEntity>(predicate: predicate)
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first?.toDTO()
+    }
+
+    // pendingUpload / pendingDelete 상태인 것만 조회
+    func fetchPending() throws -> [DayWorkDTO] {
+        let uploadRaw = SyncStatus.pendingUpload.rawValue
+        let deleteRaw = SyncStatus.pendingDelete.rawValue
+        let predicate = #Predicate<DayWorkEntity> {
+            $0.syncStatus == uploadRaw || $0.syncStatus == deleteRaw
+        }
+        return try context.fetch(FetchDescriptor<DayWorkEntity>(predicate: predicate))
+            .map { $0.toDTO() }
+    }
+
+    // syncStatus만 업데이트
+    func updateSyncStatus(id: String, status: SyncStatus) throws {
+        let predicate = #Predicate<DayWorkEntity> { $0.id == id }
+        var descriptor = FetchDescriptor<DayWorkEntity>(predicate: predicate)
+        descriptor.fetchLimit = 1
+        guard let entity = try context.fetch(descriptor).first else { return }
+        entity.syncStatus = status.rawValue
+        try context.save()
+    }
+
+    // CloudKit 업로드 성공 후 changeTag + status 저장
+    func updateCloudMeta(id: String, changeTag: String?, status: SyncStatus) throws {
+        let predicate = #Predicate<DayWorkEntity> { $0.id == id }
+        var descriptor = FetchDescriptor<DayWorkEntity>(predicate: predicate)
+        descriptor.fetchLimit = 1
+        guard let entity = try context.fetch(descriptor).first else { return }
+        entity.cloudChangeTag = changeTag
+        entity.syncStatus = status.rawValue
+        try context.save()
+    }
+
+    // soft delete (실제 삭제 X, pendingDelete 마킹)
+    func markDeleted(id: String) throws {
+        let predicate = #Predicate<DayWorkEntity> { $0.id == id }
+        var descriptor = FetchDescriptor<DayWorkEntity>(predicate: predicate)
+        descriptor.fetchLimit = 1
+        guard let entity = try context.fetch(descriptor).first else { return }
+        entity.isDeleted = true
+        entity.syncStatus = SyncStatus.pendingDelete.rawValue
+        entity.updatedAt = Date()
+        try context.save()
     }
 }

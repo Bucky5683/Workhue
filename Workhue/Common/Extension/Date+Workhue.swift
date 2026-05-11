@@ -12,4 +12,10 @@ extension Date {
         let calendar = Calendar.current
         return String(calendar.component(.day, from: self))
     }
+    
+    var dateKey: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: self)
+    }
 }

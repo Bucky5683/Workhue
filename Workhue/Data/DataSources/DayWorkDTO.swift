@@ -18,13 +18,20 @@ struct DayWorkDTO: Codable {
     var checkList: [WorkCheckListDTO]
     var workColor: String?
     var customHex: String?
+    
+    var dateKey: String              // "yyyy-MM-dd" → CloudKit recordName 기준
+    var updatedAt: Date              // 충돌 해결 기준
+    var isDeleted: Bool              // soft delete
+    var syncStatus: String           // SyncStatus.rawValue
+    var cloudRecordName: String?     // 저장된 CKRecord 이름
+    var cloudChangeTag: String?      // 충돌 감지용
 }
 
 struct WorkCheckListDTO: Codable {
     let id: String
     let content: String
     let isDone: Bool
-
+    
     init(from model: WorkCheckList) {
         self.id = model.id
         self.content = model.content
@@ -37,7 +44,7 @@ struct WorkCheckListDTO: Codable {
         self.content = content
         self.isDone = isDone
     }
-
+    
     func toModel() -> WorkCheckList {
         WorkCheckList(id: id, content: content, isDone: isDone)
     }
@@ -55,6 +62,13 @@ extension DayWorkDTO {
         self.checkList = model.checkList.map { WorkCheckListDTO(from: $0) }
         self.workColor = model.workColor?.rawValue
         self.customHex = model.customHex
+        // ✅ sync 필드 기본값
+        self.dateKey = model.date.dateKey
+        self.updatedAt = Date()
+        self.isDeleted = false
+        self.syncStatus = SyncStatus.pendingUpload.rawValue
+        self.cloudRecordName = nil
+        self.cloudChangeTag = nil
     }
 }
 
@@ -66,7 +80,7 @@ extension DayWorkDTO {
             let date = record["date"] as? Date,
             let statusRaw = record["status"] as? String
         else { return nil }
-
+        
         self.id = id
         self.date = date
         self.status = statusRaw
@@ -75,7 +89,7 @@ extension DayWorkDTO {
         self.remembrance = record["remembrance"] as? String
         self.workColor = record["workColor"] as? String
         self.customHex = record["customHex"] as? String
-
+        
         if let str = record["checkList"] as? String,
            let data = str.data(using: .utf8),
            let list = try? JSONDecoder().decode([WorkCheckListDTO].self, from: data) {
@@ -83,8 +97,16 @@ extension DayWorkDTO {
         } else {
             self.checkList = []
         }
+        
+        // ✅ sync 필드
+        self.dateKey = date.dateKey
+        self.updatedAt = (record["updatedAt"] as? Date) ?? date
+        self.isDeleted = false
+        self.syncStatus = SyncStatus.synced.rawValue
+        self.cloudRecordName = record.recordID.recordName
+        self.cloudChangeTag = record.recordChangeTag
     }
-
+    
     func apply(to record: CKRecord) {
         record["id"] = id
         record["date"] = date
@@ -94,7 +116,7 @@ extension DayWorkDTO {
         record["remembrance"] = remembrance
         record["workColor"] = workColor
         record["customHex"] = customHex  // 추가
-
+        
         if let data = try? JSONEncoder().encode(checkList),
            let str = String(data: data, encoding: .utf8) {
             record["checkList"] = str
@@ -117,5 +139,14 @@ extension DayWorkDTO {
             remembrance: remembrance,
             checkList: checkList.map { $0.toModel() }
         )
+    }
+}
+
+// MARK: - withSyncStatus 헬퍼 (SyncCoordinator에서 사용)
+extension DayWorkDTO {
+    func withSyncStatus(_ status: SyncStatus) -> DayWorkDTO {
+        var copy = self
+        copy.syncStatus = status.rawValue
+        return copy
     }
 }

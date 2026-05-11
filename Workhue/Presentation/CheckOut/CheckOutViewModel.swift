@@ -27,7 +27,8 @@ final class CheckOutViewModel: ObservableObject {
         }
         // ViewModel init에서
         let context = SwiftDataManager.shared.context  // 한 번만
-        let repo = DayWorkRepositoryImpl(context: context)
+        let local = DayWorkLocalDataSource(context: context)
+        let repo = DayWorkRepositoryImpl(local: local)
         self.saveUseCase = SaveDayWorkUseCase(repository: repo)
     }
 

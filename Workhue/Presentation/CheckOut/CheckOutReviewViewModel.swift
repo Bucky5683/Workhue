@@ -31,7 +31,8 @@ final class CheckOutReviewViewModel: ObservableObject {
         self.selectedCustomHex = workModel.customHex
 
         let context = SwiftDataManager.shared.context
-        let repo = DayWorkRepositoryImpl(context: context)
+        let local = DayWorkLocalDataSource(context: context)
+        let repo = DayWorkRepositoryImpl(local: local)
         self.saveUseCase = SaveDayWorkUseCase(repository: repo)
         self.getUseCase = GetDayWorkUseCase(repository: repo)
         self.streakRepo = StreakRepositoryImpl(context: context)

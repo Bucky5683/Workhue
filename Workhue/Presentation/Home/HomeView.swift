@@ -5,7 +5,8 @@ struct HomeView: View {
     
     @StateObject private var viewModel: HomeViewModel = {
         let context = SwiftDataManager.shared.context
-        let repo = DayWorkRepositoryImpl(context: context)
+        let local = DayWorkLocalDataSource(context: context)
+        let repo = DayWorkRepositoryImpl(local: local)
         let getUseCase = GetDayWorkUseCase(repository: repo)
         let saveUseCase = SaveDayWorkUseCase(repository: repo)
         return HomeViewModel(getUseCase: getUseCase, saveUseCase: saveUseCase)

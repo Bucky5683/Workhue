@@ -18,6 +18,13 @@ class DayWorkEntity {
     var workColor: String?
     var customHex: String?
     var remembrance: String?
+    // MARK: - Sync Metadata
+    var dateKey: String = ""          // "yyyy-MM-dd"
+    var updatedAt: Date = Date()
+    var isDeleted: Bool = false
+    var syncStatus: String = SyncStatus.pendingUpload.rawValue
+    var cloudRecordName: String? = nil
+    var cloudChangeTag: String? = nil
     @Relationship(deleteRule: .cascade) var checkItems: [WorkCheckListEntity] = []
 
     init(
@@ -51,7 +58,14 @@ class DayWorkEntity {
             remembrance: remembrance,
             checkList: checkItems.map { WorkCheckListDTO(id: $0.id, content: $0.content, isDone: $0.isDone) },
             workColor: workColor,
-            customHex: customHex
+            customHex: customHex,
+            // ✅ sync 필드 추가
+            dateKey: dateKey,
+            updatedAt: updatedAt,
+            isDeleted: isDeleted,
+            syncStatus: syncStatus,
+            cloudRecordName: cloudRecordName,
+            cloudChangeTag: cloudChangeTag
         )
     }
 
@@ -70,6 +84,13 @@ class DayWorkEntity {
         entity.checkItems = dto.checkList.map {
             WorkCheckListEntity(id: $0.id, content: $0.content, isDone: $0.isDone)
         }
+        // ✅ sync 필드 추가
+        entity.dateKey = dto.dateKey
+        entity.updatedAt = dto.updatedAt
+        entity.isDeleted = dto.isDeleted
+        entity.syncStatus = dto.syncStatus
+        entity.cloudRecordName = dto.cloudRecordName
+        entity.cloudChangeTag = dto.cloudChangeTag
         return entity
     }
 }
