@@ -6,6 +6,7 @@ struct WorkDetailView: View {
     let onSave: (() -> Void)?
 
     @StateObject private var viewModel: WorkDetailViewModel
+    @State private var checkOutTime: Date = Date()
 
     init(workModel: DayWorkModel, onSave: (() -> Void)? = nil) {
         self.workModel = workModel
@@ -142,6 +143,49 @@ struct WorkDetailView: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            
+            if workModel.status == .working {
+                Button {
+                    NavigationRouter.shared.present(
+                        TimePickerSheet(
+                            title: "퇴근 시간",
+                            time: $checkOutTime
+                        ) {
+                            NavigationRouter.shared.dismiss()
+                            // ✅ 잠깐 기다렸다가 push (dismiss 애니메이션 끝나고)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                let updated = DayWorkModel(
+                                    id: workModel.id,
+                                    date: workModel.date,
+                                    status: workModel.status,
+                                    startTime: workModel.startTime,
+                                    endTime: checkOutTime,
+                                    workColor: workModel.workColor,
+                                    customHex: workModel.customHex,
+                                    remembrance: workModel.remembrance,
+                                    checkList: workModel.checkList
+                                )
+                                NavigationRouter.shared.push(.checkOut(updated))
+                            }
+                        } onCancel: {
+                            NavigationRouter.shared.dismiss()
+                        }
+                        .presentationDetents([.height(320)])
+                        .presentationBackground(Color.System.background),
+                        style: .sheet
+                    )
+                } label: {
+                    Text("퇴근하기")
+                        .font(.system(size: FontSize.md, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.System.main)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 16)
+            }
         }
         .background(Color.System.background)
         .overlay {
