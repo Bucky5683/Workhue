@@ -59,7 +59,10 @@ final class CheckInViewModel: ObservableObject {
             isLoading = true
             let checkList = goals
                 .filter { !$0.content.isEmpty }
-                .map { WorkCheckList(id: $0.id, content: $0.content, isDone: false) }
+                .enumerated()
+                .map { index, goal in
+                    WorkCheckList(id: goal.id, content: goal.content, isDone: false, orderIndex: index)
+                }
 
             let model = DayWorkModel(
                 id: UUID().uuidString,
