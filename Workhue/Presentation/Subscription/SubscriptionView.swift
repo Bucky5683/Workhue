@@ -23,10 +23,6 @@ struct SubscriptionView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HeaderView(headerType: .back(""))
-                .frame(height: 56)
-                .padding(.horizontal, 20)
-
             ScrollView {
                 VStack(spacing: 28) {
 
@@ -178,7 +174,6 @@ struct SubscriptionView: View {
             .background(Color.System.background)
         }
         .background(Color.System.background)
-        .navigationBarHidden(true)
         .overlay {
             if viewModel.isLoading {
                 Color.black.opacity(0.3).ignoresSafeArea()

@@ -17,10 +17,6 @@ struct CheckOutReviewView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                HeaderView(headerType: .back(""))
-                    .frame(height: 56)
-                    .padding(.horizontal, 20)
-
                 ScrollView {
                     VStack(spacing: 20) {
 
@@ -145,7 +141,6 @@ struct CheckOutReviewView: View {
                 }
             }
             .background(Color.System.background)
-            .navigationBarHidden(true)
 
             // 로딩/분석 오버레이
             if viewModel.isAnalyzing || viewModel.isLoading {

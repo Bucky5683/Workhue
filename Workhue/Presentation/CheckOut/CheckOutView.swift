@@ -16,10 +16,6 @@ struct CheckOutView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HeaderView(headerType: .back(""))
-                .frame(height: 56)
-                .padding(.horizontal, 20)
-
             List {
                 // 퇴근 시간
                 HStack {
@@ -111,7 +107,6 @@ struct CheckOutView: View {
             .padding(.bottom, 20)
         }
         .background(Color.System.background)
-        .navigationBarHidden(true)
     }
 }
 

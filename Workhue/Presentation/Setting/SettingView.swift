@@ -13,9 +13,6 @@ struct SettingView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            HeaderView(headerType: .back(""))
-                .frame(height: 56)
-
             HStack {
                 Text("이름")
                     .font(.system(size: FontSize.xxl, weight: .bold))

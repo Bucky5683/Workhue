@@ -26,6 +26,7 @@ struct WorkDetailView: View {
             )))
             .frame(height: 56)
             .padding(.horizontal, 20)
+            .padding(.top, 20)
 
             List {
                 // WorkTimeLine

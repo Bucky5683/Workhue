@@ -15,10 +15,6 @@ struct ColorPickerView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HeaderView(headerType: .back(""))
-                .frame(height: 56)
-                .padding(.horizontal, 20)
-
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     selectedColorSection
@@ -32,7 +28,6 @@ struct ColorPickerView: View {
             confirmButton
         }
         .background(Color.System.background)
-        .navigationBarHidden(true)
         .onAppear {
             store.send(.onAppear)
         }

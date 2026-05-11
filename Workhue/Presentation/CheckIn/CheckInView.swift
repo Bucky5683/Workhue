@@ -13,8 +13,6 @@ struct CheckInView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 20) {
-                HeaderView(headerType: .back(""))
-                    .frame(height: 56)
 
                 // 출근 시간 표시
                 HStack {
@@ -93,7 +91,6 @@ struct CheckInView: View {
                     .scaleEffect(1.5)
             }
         }
-        .navigationBarHidden(true)
     }
 }
 

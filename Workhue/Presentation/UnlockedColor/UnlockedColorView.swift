@@ -12,10 +12,6 @@ struct UnlockedColorsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HeaderView(headerType: .back(""))
-                .frame(height: 56)
-                .padding(.horizontal, 20)
-
             if viewModel.isLoading {
                 Spacer()
                 ProgressView()
@@ -115,7 +111,6 @@ struct UnlockedColorsView: View {
             }
         }
         .background(Color.System.background)
-        .navigationBarHidden(true)
         .onAppear {
             viewModel.onAppear()
         }
