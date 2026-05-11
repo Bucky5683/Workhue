@@ -31,22 +31,24 @@ struct WorkCheckListDTO: Codable {
     let id: String
     let content: String
     let isDone: Bool
-    
+    var orderIndex: Int = 0  // ✅ 추가
+
     init(from model: WorkCheckList) {
         self.id = model.id
         self.content = model.content
         self.isDone = model.isDone
+        self.orderIndex = model.orderIndex  // ✅ 추가
     }
-    
-    // 기존 init(from model: WorkCheckList) 외에 아래 추가
-    init(id: String, content: String, isDone: Bool) {
+
+    init(id: String, content: String, isDone: Bool, orderIndex: Int = 0) {
         self.id = id
         self.content = content
         self.isDone = isDone
+        self.orderIndex = orderIndex  // ✅ 추가
     }
-    
+
     func toModel() -> WorkCheckList {
-        WorkCheckList(id: id, content: content, isDone: isDone)
+        WorkCheckList(id: id, content: content, isDone: isDone, orderIndex: orderIndex)  // ✅ 추가
     }
 }
 

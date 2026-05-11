@@ -24,7 +24,8 @@ final class CheckInViewModel: ObservableObject {
     }
 
     func addGoal() {
-        goals.append(GoalItem(id: UUID().uuidString, content: "", isDone: false, isEditing: true))
+        let nextIndex = goals.count  // ✅ 현재 개수 = 다음 인덱스
+        goals.append(GoalItem(id: UUID().uuidString, content: "", isDone: false, isEditing: true, orderIndex: nextIndex))
     }
 
     func updateGoal(id: String, content: String) {

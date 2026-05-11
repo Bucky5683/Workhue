@@ -24,4 +24,5 @@ struct WorkCheckList: Hashable, Sendable {
     let id: String
     let content: String
     let isDone: Bool
+    var orderIndex: Int = 0  // ✅ 추가
 }

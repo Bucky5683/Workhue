@@ -10,4 +10,5 @@ struct GoalItem: Identifiable {
     var content: String
     var isDone: Bool
     var isEditing: Bool
+    var orderIndex: Int = 0  // ✅ 추가
 }

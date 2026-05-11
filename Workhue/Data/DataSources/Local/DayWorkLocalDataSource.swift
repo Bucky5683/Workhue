@@ -80,9 +80,11 @@ struct DayWorkLocalDataSource {
             existing.customHex = dto.customHex
             existing.remembrance = dto.remembrance
             existing.checkItems.forEach { context.delete($0) }
-            existing.checkItems = dto.checkList.map {
-                WorkCheckListEntity(id: $0.id, content: $0.content, isDone: $0.isDone)
-            }
+            existing.checkItems = dto.checkList
+                .sorted { $0.orderIndex < $1.orderIndex }  // ✅ 정렬
+                .map {
+                    WorkCheckListEntity(id: $0.id, content: $0.content, isDone: $0.isDone, orderIndex: $0.orderIndex)
+                }
             existing.dateKey = dto.dateKey
             existing.updatedAt = dto.updatedAt
             existing.isDeleted = dto.isDeleted

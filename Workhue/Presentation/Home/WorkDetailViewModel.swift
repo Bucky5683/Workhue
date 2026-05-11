@@ -23,14 +23,15 @@ final class WorkDetailViewModel: ObservableObject {
         self.workModel = workModel
         self.remembrance = workModel.remembrance ?? ""
         self.goals = workModel.checkList.map {
-            GoalItem(id: $0.id, content: $0.content, isDone: $0.isDone, isEditing: false)
+            GoalItem(id: $0.id, content: $0.content, isDone: $0.isDone, isEditing: false, orderIndex: $0.orderIndex)  // ✅
         }
         self.saveUseCase = saveUseCase
     }
 
     // MARK: - 목표 추가
     func addGoal() {
-        goals.append(GoalItem(id: UUID().uuidString, content: "", isDone: false, isEditing: true))
+        let nextIndex = goals.count  // ✅
+        goals.append(GoalItem(id: UUID().uuidString, content: "", isDone: false, isEditing: true, orderIndex: nextIndex))
     }
 
     // MARK: - 목표 내용 변경
@@ -62,6 +63,10 @@ final class WorkDetailViewModel: ObservableObject {
     // MARK: - 목표 삭제
     func deleteGoal(id: String) {
         goals.removeAll { $0.id == id }
+        // ✅ 삭제 후 orderIndex 재정렬
+        for idx in goals.indices {
+            goals[idx].orderIndex = idx
+        }
         saveGoals()
     }
 
@@ -75,9 +80,10 @@ final class WorkDetailViewModel: ObservableObject {
 
     // MARK: - 목표 저장
     private func saveGoals() {
-        let checkList = goals.map {
-            WorkCheckList(id: $0.id, content: $0.content, isDone: $0.isDone)
+        let checkList = goals.enumerated().map { idx, goal in
+            WorkCheckList(id: goal.id, content: goal.content, isDone: goal.isDone, orderIndex: idx)  // ✅
         }
+
         let updated = DayWorkModel(
             id: workModel.id,
             date: workModel.date,
@@ -103,8 +109,8 @@ final class WorkDetailViewModel: ObservableObject {
                 startTime: workModel.startTime,
                 endTime: workModel.endTime,
                 remembrance: remembrance,
-                checkList: goals.map {
-                    WorkCheckList(id: $0.id, content: $0.content, isDone: $0.isDone)
+                checkList: goals.enumerated().map { idx, goal in
+                    WorkCheckList(id: goal.id, content: goal.content, isDone: goal.isDone, orderIndex: idx)  // ✅
                 }
             )
             do {

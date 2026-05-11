@@ -56,7 +56,9 @@ class DayWorkEntity {
             startTime: startTime,
             endTime: endTime,
             remembrance: remembrance,
-            checkList: checkItems.map { WorkCheckListDTO(id: $0.id, content: $0.content, isDone: $0.isDone) },
+            checkList: checkItems
+                .sorted { $0.orderIndex < $1.orderIndex }  // ✅ 정렬
+                .map { WorkCheckListDTO(id: $0.id, content: $0.content, isDone: $0.isDone, orderIndex: $0.orderIndex) },
             workColor: workColor,
             customHex: customHex,
             // ✅ sync 필드 추가
@@ -81,9 +83,11 @@ class DayWorkEntity {
             customHex: dto.customHex,
             remembrance: dto.remembrance
         )
-        entity.checkItems = dto.checkList.map {
-            WorkCheckListEntity(id: $0.id, content: $0.content, isDone: $0.isDone)
-        }
+        entity.checkItems = dto.checkList
+            .sorted { $0.orderIndex < $1.orderIndex }
+            .map {
+                WorkCheckListEntity(id: $0.id, content: $0.content, isDone: $0.isDone, orderIndex: $0.orderIndex)
+            }
         // ✅ sync 필드 추가
         entity.dateKey = dto.dateKey
         entity.updatedAt = dto.updatedAt
