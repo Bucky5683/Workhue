@@ -8,6 +8,7 @@
 import Foundation
 import CloudKit
 
+@MainActor
 struct SyncConflictResolver {
     private let localDataSource: DayWorkLocalDataSource
     private let cloudDataSource: DayWorkCloudDataSource

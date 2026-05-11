@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 
+@MainActor
 protocol DayWorkRepository {
     func fetch(by date: Date) async throws -> DayWorkModel?
     func fetchAll() async throws -> [DayWorkModel]
@@ -15,6 +16,7 @@ protocol DayWorkRepository {
     func delete(id: String) async throws
 }
 
+@MainActor
 final class DayWorkRepositoryImpl: DayWorkRepository {
     private let localDataSource: DayWorkLocalDataSource
     private let syncCoordinator: WorkhueSyncCoordinator?

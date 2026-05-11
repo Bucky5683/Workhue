@@ -29,8 +29,6 @@ final class WorkhueSyncCoordinator {
 
         await pullRemoteChanges()
         await pushPendingLocalChanges()
-
-        NotificationCenter.default.post(name: .workhueSyncDidFinish, object: nil)  // ✅
     }
 
     func pullRemoteChanges() async {
@@ -64,12 +62,13 @@ final class WorkhueSyncCoordinator {
                 }
             } catch SyncError.serverRecordIsNewer {
                 try? localDataSource.updateSyncStatus(id: dto.id, status: .conflict)
-                await MainActor.run { self.onConflict?(dto) }  // ✅ 콜백만 호출
+                self.onConflict?(dto)
             } catch {
                 print("[Sync] push failed:", dto.dateKey, error)
                 try? localDataSource.updateSyncStatus(id: dto.id, status: .failed)
             }
         }
+        NotificationCenter.default.post(name: .workhueSyncDidFinish, object: nil)
     }
 
     private func mergeIntoLocal(_ remote: DayWorkDTO) async {

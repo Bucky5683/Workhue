@@ -2,7 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     let screenId: ScreenID = .home
-    
+    @Environment(\.scenePhase) private var scenePhase  // ✅ 추가
     @StateObject private var viewModel: HomeViewModel = {
         let repo = SwiftDataManager.shared.makeDayWorkRepository()
         let getUseCase = GetDayWorkUseCase(repository: repo)
