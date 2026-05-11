@@ -40,6 +40,7 @@ struct AlertView: View {
                 HStack(spacing: 12) {
                     if !model.cancelTitle.isEmpty {
                         Button(model.cancelTitle) {
+                            model.cancelAction?()   // ✅ 추가
                             NavigationRouter.shared.dismiss()
                         }
                         .frame(maxWidth: .infinity)
@@ -80,6 +81,7 @@ struct AlertModel {
     let confirmTitle: String
     let cancelTitle: String
     let confirmAction: (() -> Void)?
+    let cancelAction: (() -> Void)?
     let confirmforgroundColor: Color?
     let cancelforgroundColor: Color?
     let confirmbackgroundColor: Color?
@@ -92,6 +94,7 @@ struct AlertModel {
         confirmTitle: String = "확인",
         cancelTitle: String = "취소",
         confirmAction: (() -> Void)? = nil,
+        cancelAction: (() -> Void)? = nil,
         confirmforgroundColor: Color? = .white,
         confirmbackgroundColor: Color? = Color.System.main,
         cancelforgroundColor: Color? = Color.System.text,
@@ -103,6 +106,7 @@ struct AlertModel {
         self.confirmTitle = confirmTitle
         self.cancelTitle = cancelTitle
         self.confirmAction = confirmAction
+        self.cancelAction = cancelAction
         self.confirmforgroundColor = confirmforgroundColor
         self.confirmbackgroundColor = confirmbackgroundColor
         self.cancelforgroundColor = cancelforgroundColor

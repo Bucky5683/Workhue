@@ -61,11 +61,17 @@ struct DayWorkLocalDataSource {
     // MARK: - 저장 (insert or update)
     func save(_ dto: DayWorkDTO) throws {
         let id = dto.id
-        let predicate = #Predicate<DayWorkEntity> { $0.id == id }
+        let dateKey = dto.dateKey
+
+        // ✅ 1순위: id, 2순위: dateKey로 기존 Entity 탐색
+        let predicate = #Predicate<DayWorkEntity> {
+            $0.id == id || $0.dateKey == dateKey
+        }
         var descriptor = FetchDescriptor<DayWorkEntity>(predicate: predicate)
         descriptor.fetchLimit = 1
 
         if let existing = try context.fetch(descriptor).first {
+            existing.id = dto.id   // ✅ id 충돌 시 최신 id로 덮어쓰기
             existing.status = dto.status
             existing.startTime = dto.startTime
             existing.endTime = dto.endTime
@@ -76,14 +82,14 @@ struct DayWorkLocalDataSource {
             existing.checkItems = dto.checkList.map {
                 WorkCheckListEntity(id: $0.id, content: $0.content, isDone: $0.isDone)
             }
-            // ✅ 여기 추가
             existing.dateKey = dto.dateKey
             existing.updatedAt = dto.updatedAt
             existing.isDeleted = dto.isDeleted
             existing.syncStatus = dto.syncStatus
+            existing.cloudRecordName = dto.cloudRecordName
             existing.cloudChangeTag = dto.cloudChangeTag
         } else {
-            let entity = DayWorkEntity.from(dto)  // ← from()에도 매핑 필요
+            let entity = DayWorkEntity.from(dto)
             context.insert(entity)
         }
         try context.save()
@@ -115,8 +121,12 @@ extension DayWorkLocalDataSource {
     func fetchPending() throws -> [DayWorkDTO] {
         let uploadRaw = SyncStatus.pendingUpload.rawValue
         let deleteRaw = SyncStatus.pendingDelete.rawValue
+        let failedRaw = SyncStatus.failed.rawValue   // ✅ 추가
+
         let predicate = #Predicate<DayWorkEntity> {
-            $0.syncStatus == uploadRaw || $0.syncStatus == deleteRaw
+            $0.syncStatus == uploadRaw ||
+            $0.syncStatus == deleteRaw ||
+            $0.syncStatus == failedRaw
         }
         return try context.fetch(FetchDescriptor<DayWorkEntity>(predicate: predicate))
             .map { $0.toDTO() }
@@ -133,12 +143,13 @@ extension DayWorkLocalDataSource {
     }
 
     // CloudKit 업로드 성공 후 changeTag + status 저장
-    func updateCloudMeta(id: String, changeTag: String?, status: SyncStatus) throws {
+    func updateCloudMeta(id: String, changeTag: String?, recordName: String?, status: SyncStatus) throws {
         let predicate = #Predicate<DayWorkEntity> { $0.id == id }
         var descriptor = FetchDescriptor<DayWorkEntity>(predicate: predicate)
         descriptor.fetchLimit = 1
         guard let entity = try context.fetch(descriptor).first else { return }
         entity.cloudChangeTag = changeTag
+        entity.cloudRecordName = recordName   // ✅ 추가
         entity.syncStatus = status.rawValue
         try context.save()
     }

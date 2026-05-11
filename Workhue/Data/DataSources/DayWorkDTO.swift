@@ -119,7 +119,7 @@ extension DayWorkDTO {
         // ✅ 추가
         record["dateKey"] = dateKey
         record["updatedAt"] = updatedAt
-        record["isDeleted"] = isDeleted as CKRecordValue
+        record["isDeleted"] = NSNumber(value: isDeleted)
 
         if let data = try? JSONEncoder().encode(checkList),
            let str = String(data: data, encoding: .utf8) {
