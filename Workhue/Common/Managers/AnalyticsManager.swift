@@ -6,16 +6,14 @@
 //
 
 import Foundation
-import FirebaseAnalytics
+import OSLog
 
 final class AnalyticsManager {
     static let shared = AnalyticsManager()
+    private let logger = Logger(subsystem: "com.seoyeon.Workhue", category: "Analytics")
     private init() {}
-    
+
     func logScreen(_ screenID: ScreenID) {
-        // Firebase Analytics
-        Analytics.logEvent(AnalyticsEventScreenView, parameters: [
-            AnalyticsParameterScreenName: screenID.rawValue
-        ])
+        logger.info("screen_view: \(screenID.rawValue)")
     }
 }

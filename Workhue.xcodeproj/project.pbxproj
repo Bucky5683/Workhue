@@ -9,8 +9,6 @@
 /* Begin PBXBuildFile section */
 		EB70ABA52FAB315700E1274A /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = EB70ABA42FAB315700E1274A /* GoogleMobileAds */; };
 		EB7E0F4D2F9C88220070D45F /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = EB7E0F4C2F9C88220070D45F /* ComposableArchitecture */; };
-		EB7E0F502F9C88790070D45F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = EB7E0F4F2F9C88790070D45F /* FirebaseAnalytics */; };
-		EB7E0F522F9C88790070D45F /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = EB7E0F512F9C88790070D45F /* FirebaseCrashlytics */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,8 +42,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				EB70ABA52FAB315700E1274A /* GoogleMobileAds in Frameworks */,
-				EB7E0F522F9C88790070D45F /* FirebaseCrashlytics in Frameworks */,
-				EB7E0F502F9C88790070D45F /* FirebaseAnalytics in Frameworks */,
 				EB7E0F4D2F9C88220070D45F /* ComposableArchitecture in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -90,8 +86,6 @@
 			name = Workhue;
 			packageProductDependencies = (
 				EB7E0F4C2F9C88220070D45F /* ComposableArchitecture */,
-				EB7E0F4F2F9C88790070D45F /* FirebaseAnalytics */,
-				EB7E0F512F9C88790070D45F /* FirebaseCrashlytics */,
 				EB70ABA42FAB315700E1274A /* GoogleMobileAds */,
 			);
 			productName = Workhue;
@@ -124,7 +118,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				EB7E0F4B2F9C88220070D45F /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
-				EB7E0F4E2F9C88790070D45F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				EB70ABA32FAB315700E1274A /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -410,14 +403,6 @@
 			traits = (
 			);
 		};
-		EB7E0F4E2F9C88790070D45F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 12.12.1;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -430,16 +415,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EB7E0F4B2F9C88220070D45F /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
 			productName = ComposableArchitecture;
-		};
-		EB7E0F4F2F9C88790070D45F /* FirebaseAnalytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = EB7E0F4E2F9C88790070D45F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAnalytics;
-		};
-		EB7E0F512F9C88790070D45F /* FirebaseCrashlytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = EB7E0F4E2F9C88790070D45F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseCrashlytics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
