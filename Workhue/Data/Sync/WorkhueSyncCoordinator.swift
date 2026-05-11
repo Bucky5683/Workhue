@@ -17,9 +17,8 @@ final class WorkhueSyncCoordinator {
     }
 
     func syncNow() async {
-        async let pull: () = pullRemoteChanges()
-        async let push: () = pushPendingLocalChanges()
-        _ = await (pull, push)
+        await pullRemoteChanges()   // ✅ pull 먼저
+        await pushPendingLocalChanges()  // ✅ push 나중
     }
 
     func pullRemoteChanges() async {
@@ -56,13 +55,12 @@ final class WorkhueSyncCoordinator {
     }
 
     private func mergeIntoLocal(_ remote: DayWorkDTO) async {
-        guard let local = try? localDataSource.fetch(dateKey: remote.dateKey) else {   // ✅ try?
-            try? localDataSource.save(remote.withSyncStatus(.synced))                  // ✅ try?
+        guard let local = try? localDataSource.fetchIncludingDeleted(dateKey: remote.dateKey) else {
+            try? localDataSource.save(remote.withSyncStatus(.synced))
             return
         }
-
         if remote.updatedAt > local.updatedAt {
-            try? localDataSource.save(remote.withSyncStatus(.synced))                  // ✅ try?
+            try? localDataSource.save(remote.withSyncStatus(.synced))
         }
     }
 }

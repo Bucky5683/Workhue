@@ -80,7 +80,7 @@ extension DayWorkDTO {
             let date = record["date"] as? Date,
             let statusRaw = record["status"] as? String
         else { return nil }
-        
+
         self.id = id
         self.date = date
         self.status = statusRaw
@@ -89,7 +89,7 @@ extension DayWorkDTO {
         self.remembrance = record["remembrance"] as? String
         self.workColor = record["workColor"] as? String
         self.customHex = record["customHex"] as? String
-        
+
         if let str = record["checkList"] as? String,
            let data = str.data(using: .utf8),
            let list = try? JSONDecoder().decode([WorkCheckListDTO].self, from: data) {
@@ -97,11 +97,11 @@ extension DayWorkDTO {
         } else {
             self.checkList = []
         }
-        
-        // ✅ sync 필드
-        self.dateKey = date.dateKey
+
+        // ✅ 수정
+        self.dateKey = (record["dateKey"] as? String) ?? date.dateKey
         self.updatedAt = (record["updatedAt"] as? Date) ?? date
-        self.isDeleted = false
+        self.isDeleted = (record["isDeleted"] as? Bool) ?? false
         self.syncStatus = SyncStatus.synced.rawValue
         self.cloudRecordName = record.recordID.recordName
         self.cloudChangeTag = record.recordChangeTag
@@ -115,8 +115,12 @@ extension DayWorkDTO {
         record["endTime"] = endTime
         record["remembrance"] = remembrance
         record["workColor"] = workColor
-        record["customHex"] = customHex  // 추가
-        
+        record["customHex"] = customHex
+        // ✅ 추가
+        record["dateKey"] = dateKey
+        record["updatedAt"] = updatedAt
+        record["isDeleted"] = isDeleted as CKRecordValue
+
         if let data = try? JSONEncoder().encode(checkList),
            let str = String(data: data, encoding: .utf8) {
             record["checkList"] = str

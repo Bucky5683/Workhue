@@ -29,8 +29,7 @@ final class DayWorkRepositoryImpl: DayWorkRepository {
     }
 
     func fetch(by date: Date) async throws -> DayWorkModel? {
-        // ✅ fetch(dateKey:)는 DTO 반환 → toModel() 호출
-        try localDataSource.fetch(dateKey: date.dateKey)?.toModel()
+        try localDataSource.fetchActive(dateKey: date.dateKey)?.toModel()
     }
 
     func save(_ model: DayWorkModel) async throws {

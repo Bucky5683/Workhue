@@ -67,23 +67,35 @@ final class DayWorkCloudDataSource {
 
     func save(_ dto: DayWorkDTO) async throws -> String? {
         let recordID = recordID(for: dto.dateKey)
-        
-        // 기존 레코드 fetch 시도
         let existingRecord: CKRecord
+
         do {
             existingRecord = try await database.record(for: recordID)
-        } catch {
-            // 없으면 새로 생성
+        } catch let error as CKError where error.code == .unknownItem {
             existingRecord = CKRecord(recordType: recordType, recordID: recordID)
+        } catch {
+            throw error  // ✅ 네트워크/권한 오류는 rethrow
         }
-        
+
+        // ✅ 서버가 더 최신이면 업로드 금지
+        if let serverDTO = DayWorkDTO(from: existingRecord),
+           serverDTO.updatedAt > dto.updatedAt {
+            throw SyncError.serverRecordIsNewer
+        }
+
         dto.apply(to: existingRecord)
         let saved = try await database.save(existingRecord)
-        return saved.recordChangeTag  // cloudChangeTag로 저장
+        return saved.recordChangeTag
     }
 
     func delete(dateKey: String) async throws {
         let recordID = recordID(for: dateKey)
-        try await database.deleteRecord(withID: recordID)
+        do {
+            try await database.deleteRecord(withID: recordID)
+        } catch let error as CKError where error.code == .unknownItem {
+            return  // ✅ 이미 없으면 성공으로 처리
+        } catch {
+            throw error
+        }
     }
 }

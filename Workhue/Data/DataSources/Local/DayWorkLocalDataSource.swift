@@ -18,13 +18,30 @@ struct DayWorkLocalDataSource {
 
     // MARK: - 전체 조회
     func fetchAll() throws -> [DayWorkModel] {
+        let predicate = #Predicate<DayWorkEntity> { !$0.isDeleted }
         let descriptor = FetchDescriptor<DayWorkEntity>(
+            predicate: predicate,
             sortBy: [SortDescriptor(\.date, order: .forward)]
         )
-        let entities = try context.fetch(descriptor)
-        return entities
-            .filter { !$0.isDeleted }          // ✅ Entity 레벨에서 필터
-            .compactMap { $0.toDTO().toModel() }
+        return try context.fetch(descriptor).compactMap { $0.toDTO().toModel() }
+    }
+    
+    // Repository용 (삭제된 것 제외)
+    func fetchActive(dateKey: String) throws -> DayWorkDTO? {
+        let predicate = #Predicate<DayWorkEntity> {
+            $0.dateKey == dateKey && !$0.isDeleted
+        }
+        var descriptor = FetchDescriptor<DayWorkEntity>(predicate: predicate)
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first?.toDTO()
+    }
+
+    // SyncCoordinator용 (삭제된 것 포함)
+    func fetchIncludingDeleted(dateKey: String) throws -> DayWorkDTO? {
+        let predicate = #Predicate<DayWorkEntity> { $0.dateKey == dateKey }
+        var descriptor = FetchDescriptor<DayWorkEntity>(predicate: predicate)
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first?.toDTO()
     }
 
     // MARK: - 날짜 기준 조회
