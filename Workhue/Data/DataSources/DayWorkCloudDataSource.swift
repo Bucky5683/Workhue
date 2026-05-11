@@ -17,12 +17,26 @@ final class DayWorkCloudDataSource {
             recordType: recordType,
             predicate: NSPredicate(value: true)
         )
-        let result = try await database.records(matching: query)
-        return result.matchResults.compactMap { _, result in
-            try? result.get()
-        }.compactMap {
-            DayWorkDTO(from: $0)
+
+        var allRecords: [CKRecord] = []
+        var cursor: CKQueryOperation.Cursor? = nil
+
+        // 첫 번째 요청
+        let firstResult = try await database.records(
+            matching: query,
+            resultsLimit: 100
+        )
+        allRecords += firstResult.matchResults.compactMap { try? $0.1.get() }
+        cursor = firstResult.queryCursor
+
+        // cursor가 있는 한 계속 다음 페이지 요청
+        while let currentCursor = cursor {
+            let nextResult = try await database.records(continuingMatchFrom: currentCursor)
+            allRecords += nextResult.matchResults.compactMap { try? $0.1.get() }
+            cursor = nextResult.queryCursor
         }
+
+        return allRecords.compactMap { DayWorkDTO(from: $0) }
     }
 
     func save(_ dto: DayWorkDTO) async throws {
