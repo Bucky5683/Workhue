@@ -36,15 +36,15 @@ struct SubscriptionView: View {
                     HStack(spacing: 16) {
                         PlanCard(
                             title: "월간",
-                            price: "월 3,900원",
+                            price: viewModel.monthlyPrice,  // ✅ displayPrice
                             subPrice: nil,
                             badge: nil
                         )
 
                         PlanCard(
                             title: "연간",
-                            price: "연 29,900원",
-                            subPrice: "월 2,649원",
+                            price: viewModel.yearlyPrice,   // ✅ displayPrice
+                            subPrice: nil,
                             badge: "추천"
                         )
                     }

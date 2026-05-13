@@ -15,6 +15,14 @@ final class SubscriptionViewModel: ObservableObject {
     @Published var isLoading: Bool = false
 
     private let manager = SubscriptionManager.shared
+    
+    var monthlyPrice: String {
+        manager.products.first(where: { $0.id == SubscriptionManager.monthlyID })?.displayPrice ?? "월 3,900원"
+    }
+
+    var yearlyPrice: String {
+        manager.products.first(where: { $0.id == SubscriptionManager.yearlyID })?.displayPrice ?? "연 29,900원"
+    }
 
     var products: [Product] { manager.products }
 
